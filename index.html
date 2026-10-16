@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>웹소설 표지 일러스트 모음</title>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --like: #e0245e;
+    --surface: #f7f7f8;
+    --line: #e9e9ec;
+    --text: #1c1c1e;
+    --muted: #6e6e73;
+    --faint: #a1a1a6;
+    --accent: #111111;
+    --radius: 14px;
+    /* 노치·홈 인디케이터 등 기기 안전 영역. 헤더 높이에 위쪽 inset 을 포함해 헤더 기준으로 붙는 요소들이 함께 내려온다 */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --header-h: calc(64px + var(--sat));
+    --panel-w: 264px;
+    --col-w: 240px;
+    --gap: 14px;
+    --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  /* 스크롤바 자리를 늘 비워 둔다. 스크롤바가 생기고 사라질 때마다 격자 폭이 바뀌면, 페이지 높이가 화면과 비슷할 때 재배치가 끝없이 되풀이된다 */
+  html { scrollbar-gutter: stable; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; -webkit-font-smoothing: antialiased; }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; background: none; border: 0; padding: 0; }
+  a { color: inherit; }
+
+  /* ---------- header ---------- */
+  .header { position: sticky; top: 0; z-index: 30; height: var(--header-h); display: flex; align-items: center; gap: 14px; padding: var(--sat) calc(20px + var(--sar)) 0 calc(20px + var(--sal)); background: rgba(255,255,255,.88); backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 10px; margin-left: -8px; font-weight: 700; letter-spacing: -.01em; font-size: 16px; white-space: nowrap; }
+  .search { flex: 999 1 auto; min-width: 160px; max-width: 560px; position: relative; }
+  .search input { width: 100%; height: 40px; padding: 0 40px 0 40px; border-radius: 999px; border: 1px solid transparent; background: var(--surface); outline: none; transition: .15s; }
+  .search input:focus { background: #fff; border-color: #cfcfd4; box-shadow: 0 0 0 4px rgba(0,0,0,.04); }
+  .search svg { position: absolute; left: 14px; top: 12px; width: 16px; height: 16px; color: var(--faint); }
+  .search input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+  .search .clear { position: absolute; right: 8px; top: 8px; width: 24px; height: 24px; border-radius: 50%; color: var(--muted); display: none; }
+  .search .clear:hover { background: var(--line); }
+  .search.has .clear { display: grid; place-items: center; }
+  .spacer { flex: 1 1 0; min-width: 0; }
+  .ctl { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .ctl label { display: flex; align-items: center; gap: 8px; }
+  input[type=range] { -webkit-appearance: none; direction: rtl; width: 72px; height: 4px; background: var(--line); border-radius: 2px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 1px solid #cfcfd4; box-shadow: 0 1px 3px rgba(0,0,0,.15); cursor: pointer; }
+  .select { height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--text); font-size: 13px; }
+  .select:disabled { color: var(--faint); background: var(--surface); cursor: default; }
+  .iconbtn { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--muted); }
+  .iconbtn:hover { background: var(--surface); color: var(--text); }
+  .iconbtn.on { background: var(--accent); color: #fff; }
+  /* 흑백 표시 체크박스. 헤더의 썸네일 슬라이더 옆과 상세창 정보란 오른쪽 아래에 같은 모양으로 둔다 */
+  .opt.gray { padding: 6px; font-size: 12px; color: var(--muted); }
+  .lb .graymeta { margin: auto -6px -6px auto; }
+
+  /* ---------- layout ---------- */
+  .layout { display: flex; min-height: calc(100vh - var(--header-h)); }
+  .panel { width: var(--panel-w); flex: none; position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); display: flex; flex-direction: column; border-right: 1px solid var(--line); background: #fff; transition: margin .2s ease; }
+  .panel.hidden { margin-left: calc(-1 * var(--panel-w)); }
+  .resizer { position: absolute; top: 0; right: -4px; width: 8px; height: 100%; cursor: col-resize; z-index: 2; }
+  .resizer::after { content: ""; position: absolute; left: 3px; top: 0; width: 2px; height: 100%; background: var(--accent); opacity: 0; transition: opacity .15s; }
+  .resizer:hover::after, body.resizing .resizer::after { opacity: .6; }
+  body.resizing { cursor: col-resize; user-select: none; }
+  body.resizing .panel, body.noanim .panel { transition: none; }
+  .panel-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 16px calc(24px + var(--sab)) calc(16px + var(--sal)); scrollbar-width: thin; }
+  .panel-top { flex: none; padding: 12px 12px 10px calc(12px + var(--sal)); border-bottom: 1px solid var(--line); background: #fff; }
+  .resetall { width: 100%; height: 40px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, transform .1s; }
+  .resetall:hover { background: #333; }
+  .resetall:active { transform: scale(.98); }
+  /* 선택된 필터가 없으면 자리는 그대로 두고 비활성으로만 보여 준다 */
+  .resetall:disabled { background: var(--surface); color: var(--faint); cursor: default; transform: none; }
+  .resetall:disabled .n { display: none; }
+  .resetall .n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(255,255,255,.24); font-size: 12px; font-weight: 600; display: grid; place-items: center; }
+  .group { margin-bottom: 22px; }
+  .group h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; justify-content: space-between; }
+  /* 헤더 양쪽 묶음 안의 이름·접기·개수·초기화를 모두 세로 중앙에 맞춘다 */
+  .group h3 > span { display: inline-flex; align-items: center; gap: 4px; }
+  .group h3 .count { letter-spacing: 0; text-transform: none; }
+  /* 그룹 헤더 안에서는 한 단계 작게 둔다 */
+  .group h3 .clr { display: none; font-size: 11px; }
+  .group.active h3 .clr { display: inline; }
+  /* 그룹 이름 옆의 접기·펼치기. 목록이 기본 표시 수를 넘을 때만 보이며, 초기화와 달리 밑줄 없이 연한 색을 쓴다 */
+  .group h3 .fold { font-size: 11px; text-decoration: none; color: #d0d0d2; }
+  .group h3 .fold:hover { color: var(--text); }
+  .group h3 .fold[hidden] { display: none; }
+  /* 필터 그룹의 찾기 입력은 메인 검색바와 같은 스타일의 작은 변형이다 */
+  .search.sm { flex: none; min-width: 0; max-width: none; margin-bottom: 8px; }
+  .search.sm input { height: 32px; font-size: 12px; padding: 0 30px 0 32px; }
+  .search.sm svg { left: 11px; top: 9px; width: 14px; height: 14px; }
+  .search.sm .clear { right: 5px; top: 5px; width: 22px; height: 22px; font-size: 11px; }
+  .opts { display: flex; flex-direction: column; gap: 2px; }
+  /* 접힌 상태에서는 아래 56px 구간을 흰색으로 덮는다. 바닥 6px은 완전한 흰색이고, 그 위로 올라가면서 흰색이 걷힌다 */
+  .opts.clipped { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18x), transparent calc(100% - 8px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent calc(100% - 8px)); }
+  .more { display: block; width: 100%; margin-top: 0; }
+  .more[hidden] { display: none; }
+  .opt { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; font-size: 13px; cursor: pointer; user-select: none; }
+  .opt:hover { background: var(--surface); }
+  .opt input { display: none; }
+  .opt .box { width: 16px; height: 16px; flex: none; border-radius: 5px; border: 1.5px solid #c9c9cf; display: grid; place-items: center; transition: .12s; }
+  .opt .box svg { width: 10px; height: 10px; opacity: 0; color: #fff; }
+  .opt input:checked + .box { background: var(--accent); border-color: var(--accent); }
+  .opt input:checked + .box svg { opacity: 1; }
+  .opt .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 숫자 칸 너비를 고정해 그 왼쪽의 별표가 행마다 밀리지 않고 한 열에 서게 한다 */
+  .opt .n { color: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+  /* 결과가 없는 항목은 흰색에 가깝게 옅게 두어, 접힌 목록 끝의 흐려지는 구간과 구분되게 한다 */
+  .opt.dim { opacity: .28; }
+  /* 필터 항목과 그룹 헤더가 함께 쓰는 별표. 사파리는 button 안의 grid 정렬이 어긋나므로 flex 로 가운데 맞추고 svg 를 블록으로 둔다 */
+  .fav { flex: none; display: flex; align-items: center; justify-content: center; align-self: center; line-height: 0; color: var(--faint); transition: opacity .12s, color .12s; }
+  .fav:hover { color: var(--text); }
+  .fav.on, .fav.on:hover { color: #f0b429; }
+  .fav svg { display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+  .fav.on svg { fill: currentColor; }
+  .opt .fav { width: 18px; height: 18px; margin-right: -4px; opacity: 0; }
+  .opt:hover .fav, .opt .fav.on, .opt .fav:focus-visible { opacity: 1; }
+  .opt .fav svg { width: 13px; height: 13px; }
+  .more { font-size: 12px; color: var(--muted); padding: 6px 8px; text-align: left; border-radius: 8px; }
+  .more:hover { color: var(--text); background: var(--surface); }
+  .genre-mode { display: flex; gap: 4px; padding: 3px; background: var(--surface); border-radius: 8px; margin-bottom: 8px; }
+  .genre-mode button { flex: 1; height: 26px; border-radius: 6px; font-size: 12px; color: var(--muted); }
+  .genre-mode button.on { background: #fff; color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+  /* 열이 줄면 카드 폭은 바로 넓어지고 위치는 애니메이션으로 옮겨 가므로, 그 사이 오른쪽 열 카드가 격자 밖으로 삐져나온다.
+     잘라 두지 않으면 모바일 브라우저가 넓어진 문서에 맞춰 페이지 전체를 축소하고 되돌리지 않는다. 카드 초점 테두리가 잘리지 않게 격자 여백 바깥에서 자른다 */
+  .main { flex: 1; min-width: 0; overflow-x: clip; }
+  .toolbar { display: flex; align-items: center; gap: 10px; padding: 14px calc(22px + var(--sar)) 4px calc(22px + var(--sal)); flex-wrap: wrap; min-height: 46px; }
+  /* 툴바와 필터 그룹 헤더가 함께 쓰는 개수 표시. 기본은 보통 굵기이고, 좁혀졌거나 선택된 개수만 굵게 강조한다 */
+  .count { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+  .count b { color: var(--text); font-weight: 600; }
+  .toolbar .count { font-size: 13px; }
+  /* 그룹이 켜져 있을 때만 보이는 즐겨찾기 상단 고정 토글. 필터 패널의 체크박스 모양을 그대로 쓴다 */
+  .favtop, .showlike { font-size: 12px; color: var(--muted); }
+  .favtop { margin-left: auto; }
+  .favtop[hidden] { display: none; }
+  /* 썸네일 좋아요 표시 토글. 즐겨찾기 토글이 숨겨지면 대신 오른쪽 끝에 붙는다 */
+  .showlike { margin-left: -8px; }
+  .favtop[hidden] + .showlike { margin-left: auto; }
+  /* 표시를 끄면 좋아요한 표지의 하트도 평소엔 감추고, 카드에 마우스를 올리거나 포커스했을 때만 보인다 */
+  body.hide-like .card .likebtn { opacity: 0; }
+  body.hide-like .card:hover .likebtn, body.hide-like .card:focus-visible .likebtn, body.hide-like .card .likebtn:focus-visible { opacity: 1; }
+  /* 흑백으로 표시를 켜면 카드 썸네일과 확대 보기 이미지를 모두 흑백으로 보여 준다 */
+  body.gray .card img, body.gray .lb .stage .pic { filter: grayscale(1); }
+  body.gray .lb .stage .bg { filter: blur(32px) saturate(1.2) brightness(.75) grayscale(1); }
+  /* 모바일 자막 띠의 흑백 토글. 하트 왼쪽에 BW 글자를 두른 원을 두고 켜지면 흰 원으로 채워 상태를 보여 준다 */
+  .lb .cap .capgray { display: none; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; }
+  .chip .k { color: var(--faint); }
+  .chip button { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+  .chip button:hover { background: #e2e2e6; color: var(--text); }
+  /* 툴바의 필터 초기화와 필터 그룹 헤더의 초기화가 함께 쓰는 밑줄 링크 버튼 */
+  .reset { font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+  .reset:hover { color: var(--text); }
+  /* 즐겨찾기 모드에서 그룹 기준을 고르는 토글 줄 */
+  .favbar { padding: 14px calc(22px + var(--sar)) 0 calc(22px + var(--sal)); }
+  .favbar[hidden] { display: none; }
+  .favbar h3 { margin: 0 0 10px; font-size: 17px; font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+  .favbar .keys { display: flex; gap: 6px; flex-wrap: wrap; }
+  .favbar button { height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 12.5px; color: var(--muted); }
+  .favbar button:hover { background: var(--surface); color: var(--text); }
+  .favbar button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .favbar button .n { margin-left: 5px; color: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+  /* 좋아요 라벨 바에는 아래 내용이 없으므로 제목 밑 여백을 없앤다 */
+  #likeBar h3 { margin-bottom: 0; }
+  /* 라벨 바가 보이는 동안에는 툴바가 라벨 쪽에 붙도록 위 여백을 줄인다 */
+  .favbar:not([hidden]) ~ .toolbar { padding-top: 4px; }
+  .favbar button.on .n { color: rgba(255,255,255,.72); }
+  /* 즐겨찾기가 하나도 없는 기준은 연하게 둔다 */
+  .favbar button.dim { opacity: .4; }
+
+  /* ---------- masonry ---------- */
+  .grid { position: relative; margin: 8px 22px calc(60px + var(--sab)); }
+  .card { position: absolute; top: 0; left: 0; width: var(--col-w); border-radius: var(--radius); overflow: hidden; background: var(--surface); cursor: zoom-in; transition: transform .25s cubic-bezier(.2,.8,.2,1), opacity .25s; will-change: transform; opacity: 0; }
+  .card.in { opacity: 1; }
+  .card img { display: block; width: 100%; height: 100%; object-fit: cover; background: var(--surface); }
+  .card .ov { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,.8) 0%, rgba(0,0,0,.8) 55%, rgba(0,0,0,0) 100%); opacity: 0; transition: opacity .18s; padding: 56px 50px 14px 14px; color: #fff; }
+  .card:hover .ov, .card:focus-visible .ov { opacity: 1; }
+  .card .t { font-weight: 600; font-size: 14px; line-height: 1.3; text-shadow: 0 1px 8px rgba(0,0,0,.4); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .s { font-size: 12px; opacity: .85; margin-top: 4px; overflow: hidden; }
+  .card .s > div { display: flex; flex-wrap: wrap; margin-left: -13px; }
+  .card .s span { white-space: nowrap; }
+  .card .s span::before { content: '·'; display: inline-block; width: 7px; margin-right: 6px; text-align: center; opacity: .6; }
+  /* 클릭 영역과 SVG 뷰박스 안의 투명 영역을 감안해 보이는 하트 윤곽을 14px 여백에 맞춘다 */
+  .card .likebtn { position: absolute; right: 8px; bottom: 8px; width: 36px; height: 36px; background: none; display: grid; place-items: center; color: #fff; filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); opacity: 0; transition: opacity .18s; z-index: 1; }
+  .card:hover .likebtn, .card:focus-visible .likebtn, .card .likebtn.on, .card .likebtn:focus-visible { opacity: 1; }
+  .card .likebtn svg { width: 28px; height: 28px; }
+  .card .likebtn:not(.on):hover svg { fill: rgba(255,255,255,.35); }
+  /* 출처의 원격 이미지를 못 받아 저장된 파일로 대체했을 때 이미지 오른쪽 아래에 두는 경고. 누르면 토스트로 안내한다 */
+  .lost { position: absolute; right: 0; bottom: 0; z-index: 2; width: 56px; height: 56px; display: grid; place-items: center; color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)) drop-shadow(0 0 6px rgba(0,0,0,.35)); }
+  .lost svg { width: 36px; height: 36px; }
+  .lost[hidden] { display: none; }
+  /* 하트 아이콘 공통 규칙. 미선택은 외곽선만, 선택은 외곽선을 그대로 두고 안쪽만 분홍으로 채운다. 크기와 배치만 자리마다 정한다 */
+  .like svg { fill: none; stroke: currentColor; stroke-width: 2; transition: fill .12s; }
+  .like.on svg { fill: var(--like); stroke: #fff; }
+  /* 상세창 헤더의 하트 토글. 제목 줄 오른쪽 끝에 아이콘만 두고, 음수 여백으로 아이콘 가장자리를 제목 위·본문 오른쪽 선에 맞춘다 */
+  .lb .head { display: flex; align-items: flex-start; gap: 12px; }
+  .lb .head > div { flex: 1; min-width: 0; }
+  .lb .headlike { flex: none; width: 56px; height: 56px; margin: -10px -11px 0 0; display: grid; place-items: center; color: var(--muted); }
+  .lb .headlike:hover { color: var(--text); }
+  .lb .headlike.on { color: var(--like); }
+  /* 흰 배경에서는 외곽선도 칠과 같은 핑크로 채워 한 덩어리로 보이게 한다 */
+  .lb .headlike.on svg { stroke: var(--like); }
+  .lb .headlike svg { width: 36px; height: 36px; }
+  .card:focus-visible { outline: 3px solid #111; outline-offset: 2px; }
+  .sec { margin-bottom: 34px; }
+  /* 제목·별·장수·핸들을 한 중심선에 두고 간격은 6px 로 통일한다 */
+  .sec-h { display: flex; align-items: center; gap: 6px; padding: 6px 2px 12px; position: sticky; top: var(--header-h); z-index: 5; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); }
+  .sec-h h2 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+  .sec-h .n { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .sec-h a { color: var(--muted); font-size: 12px; text-decoration: none; }
+  .sec-h a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+  .sec-h h2 .only { font: inherit; color: inherit; border-radius: 6px; padding: 2px 6px; margin-left: -6px; transition: background .12s; }
+  .sec-h h2 .only:hover { background: var(--surface); }
+  .sec-h h2 .only:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  /* 헤더 별표는 제목 글자와 같은 인라인 흐름에 두고 vertical-align 으로 맞춘다. 플렉스 baseline 정렬은 브라우저마다 svg 버튼의 기준선을 다르게 잡는다 */
+  .sec-h h2 .fav { display: inline-block; vertical-align: -0.04em; line-height: 0; padding: 0 2px; margin: 0 -2px 0 -3px; }
+  .sec-h h2 .fav svg { width: 15px; height: 15px; }
+  .sub { position: relative; }
+  .empty { padding: 80px 20px; text-align: center; color: var(--muted); }
+  .empty b { display: block; font-size: 16px; color: var(--text); margin-bottom: 6px; }
+  .sentinel { height: 1px; }
+
+  /* ---------- lightbox ---------- */
+  .lb { position: fixed; inset: 0; z-index: 50; background: rgba(20,20,22,.72); backdrop-filter: blur(6px); display: none; }
+  .lb.open { display: block; }
+  .lb .sheet { position: absolute; top: 24px; bottom: 24px; left: 50%; transform: translateX(-50%); width: var(--sheet-w, 900px); max-width: calc(100vw - 152px); display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: 100%; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+  /* 이전·현재·다음 세 칸짜리 트랙을 좌우로 끌어 넘긴다. 데스크톱과 모바일이 같은 구조를 쓴다 */
+  .lb .stage { background: #000; position: relative; overflow: hidden; min-height: 0; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+  .lb .stage:active { cursor: grabbing; }
+  .lb .stage img { display: block; width: 100%; height: 100%; object-fit: contain; -webkit-user-drag: none; user-drag: none; pointer-events: none; }
+  .lb .cap, .lb .grip, .lb .dim { display: none; }
+  .lb .track { display: flex; position: absolute; top: 0; bottom: 0; left: -100%; width: 300%; will-change: transform; }
+  .lb .slide { position: relative; flex: none; width: 33.3333%; height: 100%; overflow: hidden; background: #000; }
+  /* 이미지가 채우지 못한 여백은 같은 이미지를 크게 흐려 채운다. 가장자리가 비치지 않도록 여유 있게 키운다 */
+  .lb .stage .bg { position: absolute; inset: -48px; width: calc(100% + 96px); height: calc(100% + 96px); object-fit: cover; filter: blur(32px) saturate(1.2) brightness(.75); }
+  .lb .stage .pic { position: relative; }
+  .lb .nav { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 2px 10px rgba(0,0,0,.15); display: grid; place-items: center; color: var(--text); }
+  .lb .nav:hover { background: #fff; }
+  .lb .nav.end { opacity: .35; }
+  /* 시트 너비가 표지마다 달라도 버튼은 화면 양끝에 붙여 자리를 고정한다. 시트 최대 너비가 양쪽 76px 을 남기므로 겹치지 않는다 */
+  .lb .prev { left: 18px; }
+  .lb .next { right: 18px; }
+  .lb .back { display: none; position: absolute; top: 12px; left: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 2px 10px rgba(0,0,0,.18); color: var(--text); place-items: center; z-index: 2; }
+  .lb .meta { padding: 28px 28px 24px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
+  .lb h2 { margin: 0; font-size: 20px; line-height: 1.3; letter-spacing: -.01em; }
+  .lb .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .kv { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 8px 10px; font-size: 13px; }
+  .kv dt { color: var(--faint); margin: 0; }
+  .kv dd { margin: 0; }
+  .kv dd a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #c9c9cf; }
+  .kv dd a:hover { text-decoration-color: var(--text); }
+  .kv .flink, .lb .sub .flink { font: inherit; color: var(--text); border-bottom: 1px dashed #c9c9cf; padding-bottom: 1px; }
+  .kv .flink:hover, .lb .sub .flink:hover { border-bottom-style: solid; border-bottom-color: var(--text); }
+  .lb .sub .flink { font-weight: 500; }
+  .kv .ext { display: inline-flex; vertical-align: -3px; margin-left: 4px; color: var(--faint); text-decoration: none; }
+  .kv .ext:hover { color: var(--text); }
+  .kv .ext svg { width: 16px; height: 16px; }
+  .kv .path { color: var(--muted); text-decoration: none; }
+  .kv .path:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+  .kv .handle { margin-left: 6px; color: var(--faint); text-decoration: none; font-size: 12px; }
+  .kv .handle:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+  .kv .fav { display: inline-flex; vertical-align: -0.15em; margin-left: 5px; }
+  .kv .fav svg { width: 13px; height: 13px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { height: 24px; padding: 0 9px; border-radius: 7px; background: var(--surface); font-size: 12px; display: inline-flex; align-items: center; }
+  .tag:hover { background: var(--line); }
+  .tag .fav { margin: 0 -3px 0 5px; }
+  .tag .fav svg { width: 12px; height: 12px; }
+  .btn { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: #fff; font-size: 13px; display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+  .btn:hover { background: var(--surface); }
+  .btn svg { width: 14px; height: 14px; }
+  /* 장면 분류 편집. localhost 로 접속했을 때만 상세창 제목 줄에 톱니 버튼이 나온다 */
+  /* 톱니 버튼은 놓인 자리의 하트와 크기·색을 같게 하고 하트 바로 왼쪽에 둔다 */
+  .lb .headedit { flex: none; width: 56px; height: 56px; margin: -10px -22px 0 0; display: grid; place-items: center; color: var(--muted); }
+  .lb .headedit:hover { color: var(--text); }
+  .lb .headedit svg { width: 36px; height: 36px; }
+  .lb .headedit[hidden], .lb .cap .capedit[hidden], .lb .cap .capedit { display: none; }
+  .card .editbtn { position: absolute; right: 44px; bottom: 8px; width: 36px; height: 36px; background: none; display: grid; place-items: center; color: #fff; filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); opacity: 0; transition: opacity .18s; z-index: 1; }
+  .card:hover .editbtn, .card:focus-visible .editbtn, .card .editbtn:focus-visible { opacity: 1; }
+  .card .editbtn svg { width: 28px; height: 28px; }
+  .card .editbtn:hover svg { fill: rgba(255,255,255,.35); }
+  .se { position: fixed; inset: 0; z-index: 56; background: rgba(20,20,22,.5); backdrop-filter: blur(4px); display: none; place-items: center; padding: calc(20px + var(--sat)) calc(16px + var(--sar)) calc(20px + var(--sab)) calc(16px + var(--sal)); }
+  .se.open { display: grid; }
+  .se .box { width: min(440px, 100%); max-height: 100%; overflow-y: auto; background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 30px 80px rgba(0,0,0,.3); display: flex; flex-direction: column; gap: 18px; }
+  .se h2 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+  .se .who { margin-top: 4px; color: var(--muted); font-size: 13px; }
+  .se h4 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .se h4 b { font-weight: 500; color: var(--text); }
+  .se .row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .se .chip { height: 30px; padding: 0 11px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-size: 13px; display: inline-flex; align-items: center; }
+  .se .chip:hover { background: var(--surface); }
+  .se .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .se .step { height: 30px; border-radius: 8px; border: 1px solid var(--line); display: inline-flex; align-items: center; font-size: 13px; }
+  .se .step b { display: inline-block; min-width: 14px; margin-left: 4px; text-align: center; font-weight: 600; }
+  .se .step b.zero { color: var(--faint); font-weight: 400; }
+  .se .step button { width: 28px; height: 28px; color: var(--muted); }
+  .se .step button:hover { color: var(--text); }
+  .se .add { display: flex; gap: 6px; margin-top: 8px; }
+  .se .add input { flex: 1; min-width: 0; height: 32px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 13px; }
+  .se .foot { display: flex; justify-content: flex-end; gap: 8px; }
+  .se .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .se .btn:disabled { opacity: .5; }
+  .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 60; }
+  .toast.show { opacity: 1; }
+
+  /* ---------- account ---------- */
+  .acct { position: relative; display: flex; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--muted); }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .avatar:hover { box-shadow: 0 0 0 3px var(--line); }
+  .menu { position: absolute; right: 0; top: calc(100% + 8px); min-width: 210px; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.12); padding: 6px; z-index: 35; }
+  .menu[hidden] { display: none; }
+  .menu .who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+  .menu .who b { display: block; font-size: 13px; }
+  .menu .who span { color: var(--muted); font-size: 12px; word-break: break-all; }
+  .menu button { width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; font-size: 13px; }
+  .menu button:hover { background: var(--surface); }
+  .login { position: fixed; inset: 0; z-index: 55; background: rgba(20,20,22,.5); backdrop-filter: blur(4px); display: none; place-items: center; padding: calc(20px + var(--sat)) calc(20px + var(--sar)) calc(20px + var(--sab)) calc(20px + var(--sal)); }
+  .login.open { display: grid; }
+  .login .box { width: min(360px, 100%); background: #fff; border-radius: 20px; padding: 30px 24px 24px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.3); position: relative; }
+  .login .close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
+  .login .close:hover { background: var(--surface); color: var(--text); }
+  .login .ico { width: 52px; height: 52px; border-radius: 50%; background: #fdf2f6; color: var(--like); display: grid; place-items: center; margin: 0 auto 14px; }
+  .login .ico svg { width: 24px; height: 24px; fill: currentColor; stroke: currentColor; stroke-width: 2; }
+  .login h2 { margin: 0 0 6px; font-size: 18px; letter-spacing: -.01em; }
+  .login p { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.5; word-break: keep-all; }
+  .gbtn { height: 44px; padding: 0 20px 0 16px; border-radius: 999px; border: 1px solid #dadce0; background: #fff; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 12px; color: #1f1f1f; transition: .15s; }
+  .gbtn:hover { background: #f8f9fa; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .gbtn:disabled { opacity: .6; cursor: default; }
+  .gbtn svg { width: 20px; height: 20px; }
+  .login .note { margin: 14px 0 0; font-size: 12px; color: var(--faint); }
+  .login .note.fine { font-size: 11px; }
+  .login .alert { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: #fdf2f2; color: #b42318; font-size: 12px; line-height: 1.5; text-align: left; display: flex; gap: 8px; align-items: flex-start; }
+  .login .alert[hidden] { display: none; }
+  .login .alert svg { width: 15px; height: 15px; flex: none; margin-top: 1px; }
+  .avatar.stale::after, .avatar.failed::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border-radius: 50%; background: #f5a623; border: 2px solid #fff; }
+  .avatar.failed::after { background: var(--like); }
+  .acct .avatar { position: relative; overflow: visible; }
+  .acct .avatar img { border-radius: 50%; }
+  .menu .status { padding: 6px 10px 8px; font-size: 11px; color: var(--faint); }
+  .empty .btn { margin-top: 14px; }
+
+  .scrim { display: none; }
+
+  @media (max-width: 900px) {
+    .header { gap: 10px; padding: var(--sat) calc(12px + var(--sar)) 0 calc(12px + var(--sal)); }
+    .search { min-width: 140px; }
+    .ctl { gap: 6px; }
+    .panel { position: fixed; left: 0; z-index: 40; box-shadow: 0 0 40px rgba(0,0,0,.12); width: fit-content; min-width: 172px; max-width: min(260px, 72vw); transition: transform .2s ease; }
+    .panel.hidden { margin-left: 0; transform: translateX(-105%); box-shadow: none; }
+    .panel-scroll { padding: 14px 12px calc(20px + var(--sab)) calc(12px + var(--sal)); }
+    .panel-top { padding: 10px 10px 8px calc(10px + var(--sal)); }
+    .resizer { display: none; }
+    body.panel-open .scrim { display: block; position: fixed; inset: 0; z-index: 29; background: rgba(0,0,0,.32); }
+    .toolbar { padding: 10px calc(12px + var(--sar)) 4px calc(12px + var(--sal)); }
+    .favbar { padding: 10px calc(12px + var(--sar)) 0 calc(12px + var(--sal)); }
+    .grid { margin: 8px 12px calc(60px + var(--sab)); }
+    /* 모바일에서는 이미지를 화면 가로에 가득 채우고, 정보는 그 아래에 두어 세로로 스크롤한다 */
+    /* 모바일은 릴스처럼 이미지가 화면을 채우고, 남는 영역은 같은 이미지를 크게 흐려 채운다.
+       하단에는 제목 한 줄만 얹고, 탭하면 상세 정보 시트가 아래에서 올라온다 */
+    .lb { background: #000; backdrop-filter: none; }
+    .lb .sheet { top: 0; bottom: 0; left: 0; transform: none; width: 100vw; max-width: none; border-radius: 0; display: block; overflow: hidden; background: #000; box-shadow: none; }
+    .lb .stage { position: absolute; inset: 0; cursor: default; }
+    .lb .nav { display: none; }
+    .lb .stage { -webkit-touch-callout: none; }
+    .lb.pulling .sheet, .lb.pulling .stage, .lb.pulling .slide { background: transparent; }
+    .lb.pulling .cap, .lb.pulling .back { opacity: 0; pointer-events: none; }
+    .lb .stage .bg { transition: opacity .18s; }
+    .lb.pulling .stage .bg { opacity: 0; }
+    .lb .back { display: grid; position: fixed; top: calc(12px + var(--sat)); left: calc(12px + var(--sal)); background: rgba(0,0,0,.32); color: #fff; box-shadow: none; backdrop-filter: blur(6px); }
+    /* 모바일은 아래쪽을 캡션이 차지하므로 경고를 오른쪽 위에 둔다 */
+    .lb .lost { top: calc(4px + var(--sat)); right: calc(4px + var(--sar)); bottom: auto; }
+    .lb .cap { display: flex; position: absolute; left: 0; right: 0; bottom: 0; padding: 64px calc(16px + var(--sar)) calc(18px + var(--sab)) calc(16px + var(--sal)); background: linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,.35) 55%, rgba(0,0,0,0)); color: #fff; align-items: flex-end; justify-content: space-between; gap: 12px; cursor: pointer; transition: opacity .2s; }
+    /* 제목 칸이 남는 폭을 모두 차지해 흑백 토글과 하트가 오른쪽에 나란히 붙는다 */
+    .lb .cap > div { flex: 1; min-width: 0; }
+    .lb .cap h3 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; letter-spacing: -.01em; text-shadow: 0 1px 6px rgba(0,0,0,.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .lb .cap .s { font-size: 12.5px; opacity: .88; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+    .lb .cap .s::after { content: "더보기..."; margin-left: 10px; opacity: .75; }
+    .lb .cap .flink { font: inherit; color: inherit; text-shadow: inherit; border-bottom: 1px dotted rgba(255,255,255,.65); padding-bottom: 1px; }
+    .lb .cap .flink:active { opacity: .7; }
+    .lb .cap .caplike { flex: none; align-self: flex-start; width: 56px; height: 56px; margin: -10px -11px -6px 0; display: grid; place-items: center; color: #fff; background: none; border: 0; filter: drop-shadow(0 1px 4px rgba(0,0,0,.55)); transition: transform .12s; }
+    .lb .cap .caplike:active, .lb .cap .capedit:active { transform: scale(.9); }
+    .lb .cap .capedit:not([hidden]) { display: grid; flex: none; align-self: flex-start; width: 56px; height: 56px; margin: -10px -22px -6px 0; place-items: center; color: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,.55)); transition: transform .12s; }
+    .lb .cap .capedit svg { width: 36px; height: 36px; }
+    .lb .cap .caplike svg { width: 36px; height: 36px; }
+    .lb .cap .capgray { display: grid; flex: none; align-self: flex-start; width: 42px; height: 42px; margin: -3px -9px 0 0; place-items: center; color: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,.55)); transition: transform .12s; }
+    .lb .cap .capgray:active { transform: scale(.9); }
+    /* 테두리 3px 은 하트 선 굵기와 같다. 하트는 24 단위에서 선 굵기 2 로 그려 36px 로 표시하므로 실제 3px 이다 */
+    .lb .cap .capgray span { width: 32px; height: 32px; border-radius: 50%; border: 3px solid currentColor; display: grid; place-items: center; font: 700 12px/1 var(--font); letter-spacing: -.02em; transition: background .12s, color .12s; }
+    .lb .cap .capgray.on span { background: #fff; border-color: #fff; color: #111; }
+    .lb .graymeta { display: none; }
+    .lb .dim { display: block; position: absolute; inset: 0; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 2; }
+    .lb .meta { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; max-height: 74vh; border-radius: 20px 20px 0 0; background: #fff; padding: 8px calc(20px + var(--sar)) calc(24px + var(--sab)) calc(20px + var(--sal)); overflow-y: auto; overscroll-behavior: contain; transform: translateY(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1); box-shadow: 0 -12px 40px rgba(0,0,0,.25); }
+    .lb .grip { display: block; flex: none; width: 40px; height: 4px; border-radius: 2px; background: #d4d4d8; margin: 4px auto 8px; padding: 0; cursor: pointer; }
+    .lb .meta .grip, .lb .meta .head { touch-action: none; }
+    .lb .meta.dragging, .lb .meta.dragging ~ .dim { transition: none; }
+    .lb .grip::before { content: ""; display: block; height: 28px; margin: -12px -80px; }
+    .lb.info .meta { transform: none; }
+    .lb.info .dim { opacity: 1; pointer-events: auto; }
+    .lb.info .cap { opacity: 0; pointer-events: none; }
+  }
+
+  /* 헤더 한 줄에 모든 항목이 들어가지 않는 폭부터 제목과 슬라이더 글자를 감춰 가로 스크롤이 생기지 않게 한다 */
+  @media (max-width: 1024px) {
+    .brand { display: none; }
+    .ctl .label-text { display: none; }
+  }
+
+  /* 헤더를 두 줄로: 위에 컨트롤, 아래에 검색창 */
+  @media (max-width: 720px) {
+    :root { --header-h: calc(104px + var(--sat)); }
+    .header { flex-wrap: wrap; align-content: center; row-gap: 8px; padding: calc(8px + var(--sat)) calc(12px + var(--sar)) 8px calc(12px + var(--sal)); }
+    .search { order: 5; flex-basis: 100%; min-width: 0; max-width: none; }
+    .spacer { display: none; }
+    .ctl { flex: 1; min-width: 0; justify-content: flex-end; }
+    .ctl label { flex: none; }
+    .select { flex: 0 1 auto; min-width: 0; max-width: 132px; padding: 0 8px; }
+  }
+
+  /* 터치 기기에서는 hover가 없으므로 하트 버튼을 항상 보여준다 */
+  @media (hover: none) {
+    .card .likebtn, .card .editbtn { opacity: 1; }
+    .opt .fav { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <button class="iconbtn" id="togglePanel" title="필터 패널" aria-label="필터 패널 열기/닫기">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+  </button>
+  <div class="brand">웹소설 표지 일러스트 모음</div>
+  <div class="search" id="searchWrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="작품명, 그림작가, 글작가, 출판사 검색" autocomplete="off">
+    <button class="clear" id="qClear" aria-label="검색어 지우기">✕</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="ctl">
+    <label><span class="label-text">썸네일</span><input type="range" id="size" min="1" max="1" step="1"></label>
+    <label class="opt gray" title="표지를 흑백으로 보기"><input type="checkbox" class="grayCb"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></span>흑백</label>
+    <select class="select" id="group" title="그룹">
+      <option value="">그룹없음</option>
+      <option value="artistId">그림작가별</option>
+      <option value="genres">장르별</option>
+      <option value="novelAuthor">글작가별</option>
+      <option value="publisherId">출판사별</option>
+      <option value="platforms">플랫폼별</option>
+      <option value="year">출간 연도별</option>
+      <option value="cast">인물구성별</option>
+      <option value="animal">동물별</option>
+      <option value="time">시간대별</option>
+      <option value="space">공간별</option>
+      <option value="place">장소별</option>
+    </select>
+    <select class="select" id="sort">
+      <option value="default">기본정렬</option>
+      <option value="artist">그림작가순</option>
+      <option value="artist-desc">그림작가 역순</option>
+      <option value="author">글작가순</option>
+      <option value="author-desc">글작가 역순</option>
+      <option value="publisher">출판사순</option>
+      <option value="publisher-desc">출판사 역순</option>
+      <option value="date-desc">출간일 최신순</option>
+      <option value="date">출간일 오래된순</option>
+      <option value="title">작품명순</option>
+      <option value="title-desc">작품명 역순</option>
+      <option value="added-desc">추가일 최신순</option>
+      <option value="added">추가일 오래된순</option>
+      <option value="random">무작위</option>
+    </select>
+    <button class="iconbtn" id="favToggle" title="즐겨찾기만 보기" aria-label="즐겨찾기만 보기">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 3 15 9.3 22 10.1 16.8 14.9 18.2 21.7 12 18.3 5.8 21.7 7.2 14.9 2 10.1 9 9.3 12 3"/></svg>
+    </button>
+    <button class="iconbtn" id="likeToggle" title="좋아요만 보기" aria-label="좋아요만 보기">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+    </button>
+    <div class="acct" id="acct">
+      <button class="iconbtn" id="acctBtn" title="로그인" aria-label="로그인"></button>
+      <div class="menu" id="acctMenu" hidden>
+        <div class="who"><b id="acctName"></b><span id="acctEmail"></span></div>
+        <div class="status" id="syncStatus"></div>
+        <button id="reauthBtn" hidden>다시 로그인</button>
+        <button id="logoutBtn">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="panel" id="panel">
+    <div class="panel-top" id="panelTop">
+      <button class="resetall" id="resetAll" disabled>✕ 필터 초기화 <span class="n" id="resetAllN"></span></button>
+    </div>
+    <div class="panel-scroll">
+    <div class="group" data-key="genres">
+      <h3><span>장르</span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="genre-mode"><button class="on" data-mode="or">하나라도</button><button data-mode="and">모두 포함</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="tags">
+      <h3><span>해시태그 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="해시태그 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="artistId">
+      <h3><span>그림작가 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="작가 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="novelAuthor">
+      <h3><span>글작가 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="글작가 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="publisherId">
+      <h3><span>출판사 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="출판사 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="platforms">
+      <h3><span>플랫폼 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="year">
+      <h3><span>출간 연도 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="cast">
+      <h3><span>인물구성 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="인물구성 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="animal">
+      <h3><span>동물 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="동물 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="time">
+      <h3><span>시간대</span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="space">
+      <h3><span>공간</span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="opts"></div>
+    </div>
+    <div class="group" data-key="place">
+      <h3><span>장소 <button class="reset fold" hidden>접기</button></span><span><span class="count cnt"></span> <button class="reset clr">초기화</button></span></h3>
+      <div class="search sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="mini" placeholder="장소 찾기"><button class="clear" aria-label="찾기 지우기">✕</button></div>
+      <div class="opts"></div>
+    </div>
+    </div>
+    <div class="resizer" id="resizer" title="드래그해서 너비 조절"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main">
+    <div class="favbar" id="likeBar" hidden><h3>좋아요</h3></div>
+    <div class="favbar" id="favBar" hidden>
+      <h3>즐겨찾기</h3>
+      <div class="keys" id="favKeys"></div>
+    </div>
+    <div class="toolbar">
+      <span class="count" id="count"></span>
+      <div class="chips" id="chips"></div>
+      <button class="reset" id="reset" hidden>필터 초기화</button>
+      <label class="opt favtop" id="favTop" hidden title="즐겨찾기한 그룹을 맨 위에 모아 보기"><input type="checkbox" id="favTopCb"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></span>즐겨찾기 상단에 고정</label>
+      <label class="opt showlike" id="showLike" title="카드에 좋아요 버튼을 보여 주기"><input type="checkbox" id="showLikeCb"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></span>썸네일 좋아요 표시</label>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="sentinel" id="sentinel"></div>
+  </main>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="stage">
+      <div class="track" id="lbTrack">
+        <div class="slide side" id="slPrev" aria-hidden="true"><img class="bg" alt="" draggable="false"><img class="pic" alt="" draggable="false"></div>
+        <div class="slide main">
+          <img class="bg" id="lbBg" alt="" aria-hidden="true" draggable="false">
+          <img class="pic" id="lbImg" alt="" draggable="false">
+          <button type="button" class="lost" id="lbLost" hidden title="출처의 이미지를 불러올 수 없음" aria-label="출처의 이미지를 불러올 수 없음"></button>
+        </div>
+        <div class="slide side" id="slNext" aria-hidden="true"><img class="bg" alt="" draggable="false"><img class="pic" alt="" draggable="false"></div>
+      </div>
+      <button class="back" id="lbBack" aria-label="뒤로가기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
+      <div class="cap" id="lbCap" role="button" aria-label="상세 정보 보기">
+        <div><h3 id="capTitle"></h3><div class="s" id="capSub"></div></div>
+        <button class="capgray" id="capGray" aria-label="흑백으로 표시" aria-pressed="false"><span aria-hidden="true">BW</span></button>
+        <button class="capedit" id="capEdit" hidden aria-label="장면 분류 수정"></button>
+        <button class="caplike like" id="capLike" aria-label="좋아요"></button>
+      </div>
+    </div>
+    <div class="dim" id="lbDim"></div>
+    <div class="meta">
+      <button class="grip" id="lbGrip" aria-label="상세 정보 닫기"></button>
+      <div class="head"><div><h2 id="lbTitle"></h2><div class="sub" id="lbSub"></div></div><button class="headedit" id="lbEdit" hidden title="장면 분류 수정" aria-label="장면 분류 수정"></button><button class="headlike like" id="lbLike" title="F 키로도 토글" aria-label="좋아요"></button></div>
+      <dl class="kv" id="lbKv"></dl>
+      <div class="tags" id="lbTags"></div>
+      <label class="opt gray graymeta" title="G 키로도 토글"><input type="checkbox" class="grayCb"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></span>흑백</label>
+    </div>
+  </div>
+  <button class="nav prev" id="lbPrev" aria-label="이전"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+  <button class="nav next" id="lbNext" aria-label="다음"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+</div>
+<div class="login" id="login" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="box">
+    <button class="close" id="loginClose" aria-label="닫기">✕</button>
+    <div class="ico"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg></div>
+    <h2 id="loginTitle">좋아요를 저장</h2>
+    <p>로그인하면 좋아요와 즐겨찾기가 유지됩니다.</p>
+    <button class="gbtn" id="loginBtn"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google 계정으로 계속</button>
+    <div class="alert" id="loginNote" hidden role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span id="loginNoteText"></span></div>
+    <p class="note fine">정보는 구글 드라이브 개인공간에 저장되며, 서버에 남지 않습니다.</p>
+  </div>
+</div>
+<div class="se" id="se" role="dialog" aria-modal="true" aria-labelledby="seTitle">
+  <div class="box">
+    <div><h2 id="seTitle">장면 분류 수정</h2><div class="who" id="seWho"></div></div>
+    <div><h4>인물구성 <b id="seCastText"></b></h4><div class="row" id="seCast"></div></div>
+    <div><h4>시간대</h4><div class="row" id="seTime"></div></div>
+    <div><h4>공간</h4><div class="row" id="seSpace"></div></div>
+    <div><h4>동물</h4><div class="row" data-list="animal"></div><div class="add"><input data-add="animal" placeholder="새 동물" autocomplete="off"><button type="button" class="btn" data-addbtn="animal">추가</button></div></div>
+    <div><h4>장소</h4><div class="row" data-list="place"></div><div class="add"><input data-add="place" placeholder="새 장소" autocomplete="off"><button type="button" class="btn" data-addbtn="place">추가</button></div></div>
+    <div class="foot"><button type="button" class="btn" id="seCancel">취소</button><button type="button" class="btn primary" id="seSave">저장</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data/data.js"></script>
+<script>
+(async function () {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>';
+
+  let artists, publishers, novels, covers, builtAt = 0;
+  if (window.COVER_DATA) {
+    ({ artists, publishers, novels, covers, builtAt = 0 } = window.COVER_DATA);
+  } else {
+    try {
+      [artists, publishers, novels, covers] = await Promise.all(['data/artists.json', 'data/publishers.json', 'data/novels.json', 'data/covers.json'].map(u => fetch(u).then(r => r.json())));
+    } catch (e) {
+      $('#grid').innerHTML = '<div class="empty"><b>데이터를 불러오지 못했습니다</b>data/data.js 가 없습니다. python tools/build_data.py 를 실행해 주세요.</div>';
+      return;
+    }
+  }
+  const A = Object.fromEntries(artists.map(a => [a.id, a]));
+  const P = Object.fromEntries(publishers.map(p => [p.id, p]));
+  const N = Object.fromEntries(novels.map(n => [n.id, n]));
+  covers = covers.filter(c => N[c.novelId] || console.warn('작품 정보가 없는 표지', c.id));
+  // 인물구성은 여성+남성+남성 처럼 등장하는 수만큼 이어 저장하고, 화면에는 항목마다 개수를 붙여 여성1+남성2 로 보여 준다
+  const CAST_PARTS = ['여성', '남성', '여자아이', '남자아이', 'SD여성', 'SD남성', '동물'];
+  function castLabel(v) {
+    const n = new Map(); v.split('+').forEach(p => n.set(p, (n.get(p) || 0) + 1));
+    return [...n].map(([p, k]) => p + k).join('+');
+  }
+  // 장면 분류 편집은 localhost 로 띄운 serve.py 에서만 쓸 수 있다
+  const EDITABLE = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const searchText = c => [c._n.title, c.label, A[c.artistId]?.nickname, c._n.novelAuthor, P[c._n.publisherId]?.name, ...c._n.genres, ...c._n.tags, c.cast && castLabel(c.cast), ...c.animal, c.time, ...c.place].join(' ').toLowerCase();
+  covers.forEach((c, i) => { c._n = N[c.novelId]; c._i = i; c._rand = Math.random(); c._search = searchText(c); });
+  // 원격 이미지를 우선 쓰고, 불러오지 못한 이미지만 로컬 파일로 대체한다
+  // 표지 제목은 작품명 뒤에 외전·2차 같은 라벨을 같은 글씨로 이어 쓴다
+  const coverTitle = c => c.label ? `${c._n.title} ${c.label}` : c._n.title;
+  const EXT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+  const thumbSrc = c => c.thumbUrl || c.imageUrl || encodeURI(c.file);
+  const fullSrc = c => c.imageUrl || encodeURI(c.file);
+  // 원격 이미지를 못 받아 저장된 파일로 대체한 표지는 lost 에 담고, 이미지 왼쪽 위에 경고를 띄운다
+  const lost = new Set();
+  const LOST_ICON = '<svg viewBox="0 0 25 25" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 10V14M12.5 17V15.5M14.2483 5.64697L20.8493 17.5287C21.5899 18.8618 20.6259 20.5 19.101 20.5H5.89903C4.37406 20.5 3.41013 18.8618 4.15072 17.5287L10.7517 5.64697C11.5137 4.27535 13.4863 4.27535 14.2483 5.64697Z"/></svg>';
+  const LOST_MSG = '출처의 이미지를 불러올 수 없어 저장된 이미지를 표시합니다.';
+  const lostBadge = () => `<button type="button" class="lost" title="출처의 이미지를 불러올 수 없음" aria-label="출처의 이미지를 불러올 수 없음">${LOST_ICON}</button>`;
+  document.addEventListener('error', e => {
+    const im = e.target; if (im.tagName !== 'IMG' || !im.dataset.fb) return;
+    im.src = im.dataset.fb; delete im.dataset.fb;
+    const card = im.closest('.card');
+    if (card) { lost.add(card.querySelector('.likebtn').dataset.like); if (!card.querySelector('.lost')) card.insertAdjacentHTML('beforeend', lostBadge()); }
+    else if (im.id === 'lbImg' && visible[cur]) { lost.add(visible[cur].id); $('#lbLost').hidden = false; }
+  }, true);
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.lost')) return;
+    e.preventDefault(); e.stopPropagation(); toast(LOST_MSG);
+  }, true);
+
+  // ---------- state ----------
+  const state = { q: '', sort: 'artist', lb: '', group: '', genreMode: 'or', like: false, favMode: false, favKey: 'artistId', sel: { artistId: new Set(), genres: new Set(), tags: new Set(), novelAuthor: new Set(), publisherId: new Set(), platforms: new Set(), year: new Set(), cast: new Set(), animal: new Set(), time: new Set(), space: new Set(), place: new Set() } };
+  // ---------- saved store ----------
+  // 좋아요와 즐겨찾기는 각자의 구글 드라이브 앱 데이터 폴더에 saved.json 으로 저장된다. 서버에는 아무것도 남지 않는다.
+  // 항목마다 담김 여부와 마지막으로 바뀐 시각을 함께 두어, 여러 기기에서 따로 고친 내용을 시각이 늦은 쪽 기준으로 합친다.
+  // 뺀 항목도 시각과 함께 남겨 두어야 다른 기기의 오래된 사본이 그 항목을 되살리지 않는다.
+  const CLIENT_ID = '710573091162-e82kboa9s9c9mj2u6c4oejni6con41su.apps.googleusercontent.com';
+  const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+  const SCOPE = 'openid email profile ' + DRIVE_SCOPE;
+  const FILE_NAME = 'saved.json', AUTH_KEY = 'wnc.auth', STORE_KEY = 'wnc.saved', TOMB_DAYS = 180;
+  let auth = loadAuth();            // { token, exp, user: { sub, name, email, picture }, fileId } 또는 null
+  // 좋아요는 표지 id, 즐겨찾기는 필터키:값 을 키로 삼아 두 맵에 따로 담는다. 이 브라우저의 사본이다.
+  const KINDS = ['likes', 'favs'];  // { likes: { [표지 id]: { on, t } }, favs: { [필터키:값]: { on, t } } }
+  const emptyStore = () => ({ likes: {}, favs: {} });
+  const store = loadStore();
+  const favId = (k, v) => k + ':' + v;
+  const likes = new Set(), favs = new Set(), live = { likes, favs };
+  if (auth) fillLive();
+  let pending = null;               // 로그인이 끝나면 이어서 토글할 { kind, id }
+  function loadAuth() { try { const a = JSON.parse(localStorage.getItem(AUTH_KEY)); return a && a.token && a.user ? a : null; } catch (e) { return null; } }
+  function saveAuth() { if (auth) localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); else localStorage.removeItem(AUTH_KEY); }
+  const tokenValid = () => !!auth && auth.exp > Date.now();
+  function isStore(s) { return !!s && KINDS.every(k => s[k] && typeof s[k] === 'object'); }
+  function loadStore() { try { const s = JSON.parse(localStorage.getItem(STORE_KEY)); if (isStore(s)) return s; } catch (e) {} return emptyStore(); }
+  function saveStore() { localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
+  function fillLive() { for (const k of KINDS) { live[k].clear(); for (const [id, e] of Object.entries(store[k])) if (e.on) live[k].add(id); } }
+  function mergeItems(base, other) {
+    const out = { ...base };
+    for (const [id, e] of Object.entries(other)) { const cur = out[id]; if (!cur || e.t > cur.t || (e.t === cur.t && e.on && !cur.on)) out[id] = e; }
+    return out;
+  }
+  function sameItems(a, b) {
+    const ka = Object.keys(a).sort(), kb = Object.keys(b).sort();
+    return ka.length === kb.length && ka.every((k, i) => k === kb[i] && a[k].on === b[k].on && a[k].t === b[k].t);
+  }
+  function pruneItems(items) { const cut = Date.now() - TOMB_DAYS * 86400000; return Object.fromEntries(Object.entries(items).filter(([, e]) => e.on || e.t > cut)); }
+  const sameStore = (a, b) => KINDS.every(k => sameItems(a[k], b[k]));
+  function applyStore(data) { for (const k of KINDS) store[k] = data[k]; saveStore(); fillLive(); }
+  function setSaved(kind, id, on) { store[kind][id] = { on, t: Date.now() }; live[kind][on ? 'add' : 'delete'](id); saveStore(); scheduleSync(); }
+  // 표지 목록에서 사라진 좋아요·즐겨찾기를 해제 기록으로 바꾼다. 해제 기록은 다음 동기화 때 원격에도 반영된다.
+  // 데이터 생성 이후에 누른 항목은 이 브라우저의 데이터가 낡아 모르는 표지일 수 있으므로 남겨 둔다
+  function cleanStore() {
+    const coverIds = new Set(covers.map(c => c.id));
+    const favIds = new Set();
+    covers.forEach(c => KEYS.forEach(k => valuesOf(c, k).forEach(v => favIds.add(favId(k, v)))));
+    const valid = { likes: id => coverIds.has(id), favs: id => favIds.has(id) };
+    let changed = false;
+    for (const k of KINDS) for (const [id, e] of Object.entries(store[k]))
+      if (e.on && e.t < builtAt && !valid[k](id)) { store[k][id] = { on: false, t: Date.now() }; changed = true; }
+    if (changed) { saveStore(); fillLive(); scheduleSync(); }
+    return changed;
+  }
+
+  // ---------- google drive ----------
+  async function drive(path, opt = {}) {
+    const r = await fetch('https://www.googleapis.com' + path, { ...opt, headers: { Authorization: 'Bearer ' + auth.token, ...(opt.headers || {}) } });
+    if (r.status === 401 && auth) { auth.exp = 0; saveAuth(); setUser(auth.user); }
+    if (!r.ok) {
+      const msg = await r.json().then(j => j.error?.message || '').catch(() => '');
+      throw Object.assign(new Error(msg || 'drive ' + r.status), { status: r.status, notConfigured: /has not been used|is disabled/.test(msg) });
+    }
+    return r;
+  }
+  async function findFile() {
+    if (auth.fileId) return auth.fileId;
+    const r = await drive('/drive/v3/files?spaces=appDataFolder&fields=files(id)&q=' + encodeURIComponent(`name = '${FILE_NAME}'`));
+    auth.fileId = (await r.json()).files?.[0]?.id || null; saveAuth();
+    return auth.fileId;
+  }
+  async function readRemote() {
+    const id = await findFile(); if (!id) return null;
+    try { const data = await (await drive(`/drive/v3/files/${id}?alt=media`)).json(); return isStore(data) ? { likes: data.likes, favs: data.favs } : emptyStore(); }
+    catch (e) { if (e.status === 404) { auth.fileId = null; saveAuth(); return null; } throw e; }
+  }
+  async function writeRemote(data) {
+    const body = JSON.stringify({ version: 2, updated: new Date().toISOString(), likes: data.likes, favs: data.favs });
+    if (auth.fileId) {
+      try { await drive(`/upload/drive/v3/files/${auth.fileId}?uploadType=media`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body }); return; }
+      catch (e) { if (e.status !== 404) throw e; auth.fileId = null; saveAuth(); }
+    }
+    const boundary = 'wnc' + Date.now();
+    const meta = JSON.stringify({ name: FILE_NAME, parents: ['appDataFolder'], mimeType: 'application/json' });
+    const multipart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${boundary}--`;
+    const r = await drive('/upload/drive/v3/files?uploadType=multipart&fields=id', { method: 'POST', headers: { 'Content-Type': `multipart/related; boundary=${boundary}` }, body: multipart });
+    auth.fileId = (await r.json()).id; saveAuth();
+  }
+  // 원격을 읽어 이 브라우저의 사본과 합친 뒤, 달라졌으면 다시 쓴다. 요청은 한 줄로 세워 겹치지 않게 한다.
+  let syncT, syncChain = Promise.resolve(), syncState = { at: 0, error: null, busy: false };
+  let likesLoading = false;   // 좋아요 필터가 첫 동기화를 기다리는 안내를 띄우고 있는지
+  function scheduleSync() { clearTimeout(syncT); syncT = setTimeout(sync, 400); }
+  function sync() {
+    if (!tokenValid()) { renderSyncStatus(); return syncChain; }
+    syncState.busy = true; renderSyncStatus();
+    syncChain = syncChain.then(async () => {
+      const remote = await readRemote();
+      const merged = Object.fromEntries(KINDS.map(k => [k, pruneItems(mergeItems(remote?.[k] || {}, store[k]))]));
+      if (!remote || !sameStore(merged, remote)) await writeRemote(merged);
+      // 읽고 쓰는 동안 이 브라우저에서 누른 항목은 시각이 더 늦으므로 다시 합치면 살아남는다. 그 항목은 다음 동기화에서 올라간다.
+      const local = Object.fromEntries(KINDS.map(k => [k, mergeItems(merged[k], store[k])]));
+      const changed = !sameStore(local, store);
+      applyStore(local);
+      const cleaned = cleanStore();
+      syncState = { at: Date.now(), error: null, busy: false };
+      if (changed || cleaned) refreshSavedUI();
+      if (!sameStore(local, merged)) scheduleSync();
+    }).catch(e => {
+      syncState = { at: syncState.at, error: e, busy: false };
+      toast(e.status === 401 ? '구글 로그인이 만료되었습니다. 좋아요를 누르면 다시 로그인합니다'
+        : e.notConfigured ? '구글 드라이브 API가 꺼져 있어 저장하지 못했습니다. 콘솔에서 사용 설정해 주세요'
+        : '구글 드라이브에 저장하지 못했습니다. 다음에 다시 시도합니다', 4000);
+    }).finally(() => { renderSyncStatus(); if (likesLoading) update(); syncLb(); });
+    return syncChain;
+  }
+  const star = '<svg viewBox="0 0 24 24"><polygon points="12 3 15 9.3 22 10.1 16.8 14.9 18.2 21.7 12 18.3 5.8 21.7 7.2 14.9 2 10.1 9 9.3 12 3"/></svg>';
+  const heart ='<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>';
+  $('#capLike').innerHTML = $('#lbLike').innerHTML = heart;
+  const gear = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+  $('#capEdit').innerHTML = $('#lbEdit').innerHTML = gear;
+  const KEYS = ['artistId', 'genres', 'tags', 'novelAuthor', 'publisherId', 'platforms', 'year', 'cast', 'animal', 'time', 'space', 'place'];
+  // 작품이 아니라 표지마다 붙는 값. 그림을 보고 분류한 인물구성·동물·시간대·공간·장소다
+  const COVER_KEYS = ['cast', 'animal', 'time', 'space', 'place'];
+  // 시간대는 개수나 이름이 아니라 하루의 흐름 순서로 늘어놓는다
+  const TIMES = ['낮', '늦은 오후', '해질녘', '저녁', '밤'];
+  const timeRank = v => { const i = TIMES.indexOf(v); return i < 0 ? TIMES.length : i; };
+  // 한 표지에 여러 값이 붙는 필터 키
+  const MULTI = ['genres', 'tags', 'platforms', 'animal', 'place'];
+  // 화면을 나누는 그룹 기준. 즐겨찾기 모드에서는 토글 줄에서 고른 기준을 쓰고, 아니면 그룹 드롭다운 값을 쓴다
+  const groupBy = () => state.favMode ? state.favKey : state.group;
+  const LABEL = { artistId: '그림작가', genres: '장르', tags: '해시태그', novelAuthor: '글작가', publisherId: '출판사', platforms: '플랫폼', year: '출간 연도', cast: '인물구성', animal: '동물', time: '시간대', space: '공간', place: '장소', q: '검색' };
+  const nameOf = (k, v) => k === 'artistId' ? (A[v]?.nickname ?? v) : k === 'publisherId' ? (P[v]?.name ?? v) : k === 'tags' ? '#' + v : k === 'year' && v ? v + '년' : k === 'cast' && v ? castLabel(v) : v;
+  const valuesOf = (c, k) => k === 'animal' ? (c.animal.length ? c.animal : ['없음']) : k === 'place' ? c.place : COVER_KEYS.includes(k) ? [c[k]].filter(Boolean) : k === 'genres' || k === 'tags' ? c._n[k] : k === 'artistId' ? [c.artistId] : k === 'platforms' ? (c._n.platforms || []).map(p => p.name) : k === 'year' ? [(c._n.publishedAt || '').slice(0, 4)].filter(Boolean) : [c._n[k]];
+
+  function readHash() {
+    const h = new URLSearchParams(location.hash.slice(1));
+    state.q = h.get('q') || '';
+    state.sort = h.get('sort') || 'artist';
+    state.group = h.get('group') || '';
+    state.genreMode = h.get('gm') || 'or';
+    state.like = h.get('like') === '1';
+    const fav = h.get('fav');
+    state.favMode = KEYS.includes(fav);
+    if (state.favMode) { state.favKey = fav; state.like = false; }
+    KEYS.forEach(k => { state.sel[k] = new Set((h.get(k) || '').split('|').filter(Boolean)); });
+    state.lb = h.get('lb') || '';
+  }
+  function filterHash() {
+    const h = new URLSearchParams();
+    if (state.q) h.set('q', state.q);
+    if (state.sort !== 'artist') h.set('sort', state.sort);
+    if (state.group) h.set('group', state.group);
+    if (state.genreMode !== 'or') h.set('gm', state.genreMode);
+    if (state.like) h.set('like', '1');
+    if (state.favMode) h.set('fav', state.favKey);
+    KEYS.forEach(k => { if (state.sel[k].size) h.set(k, [...state.sel[k]].join('|')); });
+    return h;
+  }
+  function writeHash() {
+    const h = filterHash();
+    if (curId && lb.classList.contains('open')) h.set('lb', curId);
+    history.replaceState(history.state, '', h.toString() ? '#' + h.toString() : location.pathname);
+  }
+
+  // ---------- filtering ----------
+  // 좋아요·즐겨찾기 모드가 기본으로 거는 조건. 즐겨찾기 모드에서는 고른 기준 값 가운데 하나라도 즐겨찾기된 표지만 남긴다.
+  // 개수 표시의 분모도 이 조건까지만 적용해 센다
+  const inMode = c => (!state.like || likes.has(c.id)) && (!state.favMode || valuesOf(c, state.favKey).some(v => favs.has(favId(state.favKey, v))));
+  function matches(c, skipKey) {
+    if (!inMode(c)) return false;
+    if (state.q && !c._search.includes(state.q)) return false;
+    for (const k of KEYS) {
+      if (k === skipKey) continue;
+      const sel = state.sel[k]; if (!sel.size) continue;
+      const vals = valuesOf(c, k);
+      if (k === 'genres' && state.genreMode === 'and') { if (![...sel].every(g => vals.includes(g))) return false; }
+      else if (!vals.some(v => sel.has(v))) return false;
+    }
+    return true;
+  }
+  function sorted(list) {
+    // 정렬값 뒤의 -desc 는 역순 표시다. 기준 열만 뒤집고 같은 작품 안의 표지는 라벨 순으로 그대로 둔다
+    // 추가일은 같은 날 들어온 표지가 많으므로 작품 id 로 이어 넣은 순서를 지킨다
+    // 기본정렬은 추가일 최신순과 같게 동작한다
+    const sort = state.sort === 'default' ? 'added-desc' : state.sort;
+    const desc = sort.endsWith('-desc'), key = desc ? sort.slice(0, -5) : sort, dir = desc ? -1 : 1;
+    const col = { artist: c => (A[c.artistId]?.nickname || '') + c._n.title, author: c => c._n.novelAuthor + c._n.title, publisher: c => (P[c._n.publisherId]?.name || '') + c._n.title, date: c => (c._n.publishedAt || '') + c._n.title, added: c => (c.addedAt || '') + c.novelId.slice(1).padStart(6, '0') }[key];
+    const cmp = key === 'random' ? (a, b) => a._rand - b._rand : (a, b) => dir * col(a).localeCompare(col(b), 'ko') || (a.label || '').localeCompare(b.label || '', 'ko', { numeric: true });
+    const gk = groupBy();
+    if (!gk) return list.slice().sort(cmp);
+    // 장르·해시태그·플랫폼은 한 표지에 여러 개가 붙으므로 값마다 사본을 만들어 각 섹션에 넣는다. 해당 필터가 켜져 있으면 고른 값의 섹션만 만든다
+    if (MULTI.includes(gk)) {
+      const sel = state.sel[gk];
+      list = list.flatMap(c => { const gs = valuesOf(c, gk).filter(g => (!sel.size || sel.has(g)) && (!state.favMode || favs.has(favId(gk, g)))); return (gs.length ? gs : state.favMode ? [] : ['']).map(g => ({ ...c, _g: g })); });
+    }
+    const gname = c => nameOf(gk, groupKey(c));
+    // 정렬 기준이 그룹 기준과 같으면 섹션 순서도 정렬 방향을 따른다. 그 외에 출간 연도 그룹은 최신 연도부터 보여 준다
+    const SORT_GROUP = { artist: 'artistId', author: 'novelAuthor', publisher: 'publisherId', date: 'year' };
+    const gdir = SORT_GROUP[key] === gk ? dir : gk === 'year' ? -1 : 1;
+    const grank = gk === 'time' ? c => timeRank(groupKey(c)) : () => 0;
+    // 그 밖의 섹션 순서는 사이드바와 같게 전체 표지 개수가 많은 순이고, 개수가 같으면 이름순이다. 개수는 필터 상태와 무관하게 전체 기준으로 센다
+    const totals = new Map();
+    if (SORT_GROUP[key] !== gk && gk !== 'year') covers.forEach(c => valuesOf(c, gk).forEach(v => totals.set(v, (totals.get(v) || 0) + 1)));
+    const gtotal = c => totals.get(groupKey(c)) || 0;
+    // 즐겨찾기 상단 표시가 켜져 있으면 즐겨찾기한 그룹을 먼저 두고, 그 안에서는 같은 정렬 기준을 따른다
+    const top = favTop ? c => favs.has(favId(gk, groupKey(c))) : () => false;
+    return list.slice().sort((a, b) => top(b) - top(a) || !groupKey(a) - !groupKey(b) || grank(a) - grank(b) || gtotal(b) - gtotal(a) || gdir * gname(a).localeCompare(gname(b), 'ko') || cmp(a, b));
+  }
+  // 즐겨찾기 상단 표시는 기본 켜짐이고, 사용자가 바꾼 값만 이 브라우저에 저장된다
+  let favTop = localStorage.getItem('wnc.favTop') !== '0';
+  // 썸네일 좋아요 표시는 화면 설정이라 로그인과 무관하게 이 브라우저에만 저장한다. 기본은 켜짐
+  const setShowLike = on => { document.body.classList.toggle('hide-like', !on); $('#showLikeCb').checked = on; localStorage.setItem('wnc.showLike', on ? '1' : '0'); };
+  setShowLike(localStorage.getItem('wnc.showLike') !== '0');
+  $('#showLikeCb').onchange = e => setShowLike(e.target.checked);
+  // 흑백 표시도 이 브라우저에만 저장하는 화면 설정이다. 기본은 꺼짐이고 헤더·상세창 정보란·모바일 자막 띠의 토글이 한 상태를 공유한다
+  let gray = localStorage.getItem('wnc.gray') === '1';
+  const setGray = on => { gray = on; document.body.classList.toggle('gray', on); $$('.grayCb').forEach(cb => cb.checked = on); $('#capGray').classList.toggle('on', on); $('#capGray').setAttribute('aria-pressed', String(on)); localStorage.setItem('wnc.gray', on ? '1' : '0'); };
+  setGray(gray);
+  $$('.grayCb').forEach(cb => cb.onchange = e => setGray(e.target.checked));
+  $('#favTopCb').onchange = e => { if (!auth) { e.target.checked = false; openLogin(); return; } favTop = e.target.checked; localStorage.setItem('wnc.favTop', favTop ? '1' : '0'); update(); };
+  const groupKey = c => { const gk = groupBy(); return MULTI.includes(gk) ? c._g : gk === 'year' ? (c._n.publishedAt || '').slice(0, 4) : gk === 'artistId' ? c.artistId : COVER_KEYS.includes(gk) ? c[gk] : c._n[gk]; };
+
+  // ---------- filter panel ----------
+  const groupEls = Object.fromEntries($$('.group').map(g => [g.dataset.key, g]));
+  // 그룹별 펼침 상태는 브라우저에 저장해 새로고침해도 유지한다
+  const showAll = (() => { try { return JSON.parse(localStorage.getItem('wnc.showAll')) || {}; } catch (e) { return {}; } })();
+  const saveShowAll = () => localStorage.setItem('wnc.showAll', JSON.stringify(showAll));
+  function renderPanel() {
+    for (const k of KEYS) {
+      const g = groupEls[k], opts = $('.opts', g), q = ($('.mini', g)?.value || '').toLowerCase();
+      // counts: facet counts computed with other filters applied
+      const counts = new Map(), totals = new Map();
+      covers.forEach(c => valuesOf(c, k).forEach(v => { totals.set(v, (totals.get(v) || 0) + 1); if (matches(c, k)) counts.set(v, (counts.get(v) || 0) + 1); }));
+      // 순서는 필터 상태와 무관하게 고정한다. 즐겨찾기 → 전체 개수 → 이름순이며, 표시되는 숫자만 현재 필터 기준이다. 출간 연도만 개수 대신 최신 연도부터 둔다
+      let items = [...totals.keys()].map(v => ({ v, name: nameOf(k, v), n: counts.get(v) || 0, total: totals.get(v), fav: favs.has(favId(k, v)) }))
+        .filter(it => !q || it.name.toLowerCase().includes(q))
+        .sort((a, b) => (b.fav - a.fav) || (k === 'year' ? b.name.localeCompare(a.name, 'ko') : k === 'time' ? timeRank(a.v) - timeRank(b.v) : b.total - a.total || a.name.localeCompare(b.name, 'ko')));
+      // 장르·시간대·공간은 접기 없이 항상 전부 보여 준다
+      const LIMIT = 4, unfoldable = ['genres', 'time', 'space'].includes(k);
+      const limit = unfoldable || showAll[k] ? Infinity : LIMIT;
+      const hidden = Math.max(0, items.length - limit);
+      opts.innerHTML = items.slice(0, limit).map(it => `<label class="opt${it.n ? '' : ' dim'}"><input type="checkbox" data-k="${k}" data-v="${esc(it.v)}"${state.sel[k].has(it.v) ? ' checked' : ''}><span class="box">${check}</span><span class="name">${esc(it.name)}</span><button type="button" class="fav${it.fav ? ' on' : ''}" data-fav="${esc(favId(k, it.v))}" title="즐겨찾기" aria-label="즐겨찾기">${star}</button><span class="n">${it.n}</span></label>`).join('');
+      opts.classList.toggle('clipped', hidden > 0);
+      let more = opts.nextElementSibling;
+      if (!more || !more.classList.contains('more')) { more = document.createElement('button'); more.className = 'more'; opts.after(more); }
+      more.dataset.more = k;
+      more.textContent = hidden ? `${hidden}개 더 보기` : '접기';
+      more.hidden = unfoldable || (!hidden && items.length <= LIMIT);
+      const fold = $('.fold', g);
+      if (fold) { fold.hidden = items.length <= LIMIT; fold.textContent = showAll[k] ? '접기' : '펼치기'; }
+      g.classList.toggle('active', state.sel[k].size > 0);
+      $('.cnt', g).innerHTML = state.sel[k].size ? `<b>${state.sel[k].size}</b>/${totals.size}` : `${state.sel[k].size}/${totals.size}`;
+    }
+    $$('.genre-mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.genreMode));
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+  $('#panel').addEventListener('change', e => {
+    const i = e.target; if (i.type !== 'checkbox') return;
+    state.sel[i.dataset.k][i.checked ? 'add' : 'delete'](i.dataset.v); update();
+  });
+  $('#panel').addEventListener('click', e => {
+    const pb = e.target.closest('[data-fav]'); if (pb) { e.preventDefault(); toggleFav(pb.dataset.fav); return; }
+    const m = e.target.closest('[data-more]'); if (m) { showAll[m.dataset.more] = !showAll[m.dataset.more]; saveShowAll(); renderPanel(); return; }
+    const f = e.target.closest('.fold'); if (f) { const fk = f.closest('.group').dataset.key; showAll[fk] = !showAll[fk]; saveShowAll(); renderPanel(); return; }
+    const c = e.target.closest('.clr'); if (c) { state.sel[c.closest('.group').dataset.key].clear(); update(); return; }
+    const gm = e.target.closest('.genre-mode button'); if (gm) { state.genreMode = gm.dataset.mode; update(); }
+  });
+  $('#panel').addEventListener('input', e => { if (e.target.classList.contains('mini')) { e.target.closest('.search').classList.toggle('has', !!e.target.value); renderPanel(); } });
+  $('#panel').addEventListener('click', e => { const c = e.target.closest('.search .clear'); if (!c) return; const inp = $('input', c.parentElement); inp.value = ''; c.parentElement.classList.remove('has'); renderPanel(); inp.focus(); });
+
+  // ---------- chips ----------
+  function renderChips() {
+    const chips = [];
+    if (state.q) chips.push({ k: 'q', label: `“${state.q}”` });
+    KEYS.forEach(k => state.sel[k].forEach(v => chips.push({ k, v, label: nameOf(k, v) })));
+    $('#chips').innerHTML = chips.map(c => `<span class="chip"><span class="k">${LABEL[c.k]}</span>${esc(c.label)}<button data-k="${c.k}" data-v="${esc(c.v ?? '')}" aria-label="제거">✕</button></span>`).join('');
+    $('#reset').hidden = chips.length === 0;
+    $('#resetAll').disabled = chips.length === 0;
+    $('#resetAllN').textContent = chips.length;
+  }
+  $('#chips').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.k === 'q') { state.q = ''; $('#q').value = ''; } else state.sel[b.dataset.k].delete(b.dataset.v);
+    update();
+  });
+  const clearAll = () => { state.q = ''; $('#q').value = ''; KEYS.forEach(k => state.sel[k].clear()); update(); };
+  $('#reset').addEventListener('click', clearAll);
+  $('#resetAll').addEventListener('click', clearAll);
+
+  // ---------- masonry ----------
+  const grid = $('#grid'), size = $('#size');
+  let visible = [], rendered = 0, colW = 240, gap = 14, colHeights = [], cardEls = [];
+  const PAGE = 60, COL_MIN = 90;
+  const colsFor = w => Math.max(1, Math.floor((grid.clientWidth + gap) / (w + gap)));
+  function measure() {
+    const width = grid.clientWidth;
+    // 슬라이더 값은 열 개수다. 오른쪽으로 갈수록 썸네일이 커지도록 rtl 로 뒤집어 두었고, 맨 오른쪽은 화면 폭과 상관없이 한 열이다
+    size.min = 1; size.max = Math.max(+size.min, colsFor(COL_MIN));
+    const n = Math.max(+size.min, Math.min(+size.max, colsFor(colW)));
+    size.value = n;
+    const realW = Math.floor((width - gap * (n - 1)) / n);
+    document.documentElement.style.setProperty('--col-w', realW + 'px');
+    grid._n = n; grid._realW = realW; grid._w = width; colHeights = new Array(n).fill(0);
+  }
+  // 슬라이더·사이드바·창 크기처럼 보이는 목록은 그대로고 폭만 바뀔 때는 카드를 지우지 않고 자리만 옮긴다. 다시 만들면 화면이 하얗게 번쩍인다
+  function relayout() {
+    measure();
+    if (!visible.length) return;
+    if (groupBy()) {
+      $$('.sec .sub', grid).forEach(sub => { const hs = new Array(grid._n).fill(0); $$('.card', sub).forEach(el => place(el, visible[+el.dataset.i], hs)); sub.style.height = Math.max(...hs) + 'px'; });
+      return;
+    }
+    for (let i = 0; i < rendered; i++) place(cardEls[i], visible[i], colHeights);
+    grid.style.height = Math.max(...colHeights) + 'px';
+  }
+  function resetGrid() {
+    grid.innerHTML = ''; grid.style.height = ''; rendered = 0; cardEls = [];
+    measure();
+    likesLoading = false;
+    if (!visible.length) {
+      // 이 브라우저에 사본이 없고 첫 동기화가 아직 돌고 있으면 비었다고 단정하지 않고 기다린다
+      likesLoading = !!auth && syncState.busy && !syncState.at && ((state.like && !likes.size) || (state.favMode && !favs.size));
+      grid.innerHTML = (state.like || state.favMode) && !auth ?'<div class="empty" style="position:relative"><b>로그인하면 좋아요와 즐겨찾기를 저장할 수 있습니다</b>정보는 구글 드라이브 개인공간에 저장되며, 서버에 남지 않습니다.<br><button class="btn" id="emptyLogin">구글 계정으로 로그인</button></div>'
+        : (state.like || state.favMode) && !tokenValid() ? '<div class="empty" style="position:relative"><b>로그인이 만료되었습니다</b>다시 로그인하면 저장된 좋아요와 즐겨찾기를 불러옵니다.<br><button class="btn" id="emptyReauth">다시 로그인</button></div>'
+        : likesLoading ? '<div class="empty" style="position:relative">저장한 목록을 불러오는 중</div>'
+        : state.like && !covers.some(inMode) ? '<div class="empty" style="position:relative"><b>좋아요한 표지가 없습니다</b>카드에 마우스를 올리면 나오는 좋아요 버튼으로 추가해 보세요.</div>'
+        : state.favMode && !covers.some(inMode) ? `<div class="empty" style="position:relative"><b>즐겨찾기한 ${LABEL[state.favKey]} 항목이 없습니다</b>필터 패널에서 별표를 눌러 즐겨찾기에 추가해 보세요.</div>`
+        : '<div class="empty" style="position:relative"><b>조건에 맞는 항목이 없습니다</b>필터를 줄이거나 검색어를 바꿔 보세요.</div>';
+      return;
+    }
+    if (groupBy()) renderGrouped(); else renderMore();
+  }
+  function makeCard(c, i) {
+    const a = A[c.artistId];
+    const el = document.createElement('article');
+    el.className = 'card'; el.tabIndex = 0; el.dataset.i = i;
+    el.innerHTML = `<img src="${esc(thumbSrc(c))}"${c.imageUrl ? ` data-fb="${encodeURI(c.file)}"` : ''} alt="${esc(coverTitle(c))}" loading="lazy" referrerpolicy="no-referrer" width="${c.width}" height="${c.height}"><button class="likebtn like${likes.has(c.id) ? ' on' : ''}" data-like="${esc(c.id)}" title="좋아요" aria-label="좋아요">${heart}</button>${EDITABLE ? `<button class="editbtn" data-edit="${esc(c.id)}" title="장면 분류 수정" aria-label="장면 분류 수정">${gear}</button>` : ''}${lost.has(c.id) ? lostBadge() : ''}<div class="ov"><div class="t">${esc(coverTitle(c))}</div><div class="s"><div>${[a?.nickname, c._n.novelAuthor].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('')}</div></div></div>`;
+    cardEls[i] = el;
+    requestAnimationFrame(() => el.classList.add('in'));
+    return el;
+  }
+  function renderMore() {
+    const frag = document.createDocumentFragment();
+    const end = Math.min(visible.length, rendered + PAGE);
+    for (let i = rendered; i < end; i++) { const el = makeCard(visible[i], i); place(el, visible[i], colHeights); frag.appendChild(el); }
+    grid.appendChild(frag); rendered = end;
+    grid.style.height = Math.max(...colHeights) + 'px';
+  }
+  function renderGrouped() {
+    const k = groupBy(); const frag = document.createDocumentFragment();
+    let i = 0;
+    while (i < visible.length) {
+      const key = groupKey(visible[i]); const start = i;
+      while (i < visible.length && groupKey(visible[i]) === key) i++;
+      const items = visible.slice(start, i);
+      const sec = document.createElement('section'); sec.className = 'sec';
+      const a = k === 'artistId' ? A[key] : null;
+      const link = a?.socialUrl ? `<a href="${esc(a.socialUrl)}" target="_blank" rel="noopener">${a.handle ? '@' + esc(a.handle) : '링크'}</a>` : '';
+      sec.innerHTML = `<div class="sec-h"><h2>${key ? `${state.sel[k] ? `<button class="only" data-only="${esc(key)}" title="이 항목만 보기">${esc(nameOf(k, key))}</button>` : esc(nameOf(k, key))}<button type="button" class="fav${favs.has(favId(k, key)) ? ' on' : ''}" data-fav="${esc(favId(k, key))}" title="즐겨찾기" aria-label="즐겨찾기">${star}</button>` : `${LABEL[k]} 없음`}</h2><span class="n">${items.length}</span>${link}</div><div class="sub"></div>`;
+      const sub = $('.sub', sec); const hs = new Array(grid._n).fill(0);
+      items.forEach((c, j) => { const el = makeCard(c, start + j); place(el, c, hs); sub.appendChild(el); });
+      sub.style.height = Math.max(...hs) + 'px';
+      frag.appendChild(sec);
+    }
+    grid.appendChild(frag); rendered = visible.length;
+  }
+  function place(el, c, hs) {
+    const h = Math.round(grid._realW * c.height / c.width);
+    // 가장 짧은 열을 고르되, 높이 차이가 작으면 왼쪽 열을 우선한다
+    const min = Math.min(...hs), tol = Math.max(24, grid._realW * 0.25);
+    let col = hs.findIndex(v => v <= min + tol);
+    el.style.transform = `translate(${col * (grid._realW + gap)}px, ${hs[col]}px)`;
+    el.style.height = h + 'px';
+    hs[col] += h + gap;
+  }
+  grid.addEventListener('click', e => { if (e.target.closest('#emptyLogin')) { openLogin(); return; } if (e.target.closest('#emptyReauth')) { signIn(reauthCfg()).then(() => sync()).then(() => update()).catch(err => { const m = loginErr(err); if (m) toast(m); }); return; } const pb = e.target.closest('[data-fav]'); if (pb) { toggleFav(pb.dataset.fav); return; } const b = e.target.closest('[data-only]'); if (b) { const gk = groupBy(); state.sel[gk].clear(); state.sel[gk].add(b.dataset.only); update(); } });
+  new IntersectionObserver(es => { if (es[0].isIntersecting && rendered < visible.length) renderMore(); }, { rootMargin: '800px' }).observe($('#sentinel'));
+  // 모바일 브라우저의 주소창이 접히고 펴질 때도 resize가 오므로, 너비가 바뀔 때만 재배치한다
+  // 데스크톱 상세창은 높이만 바뀌어도 이미지 배치를 다시 계산한다
+  let rt, lastW = innerWidth, lastH = innerHeight;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => {
+    const wc = innerWidth !== lastW, hc = innerHeight !== lastH; lastW = innerWidth; lastH = innerHeight;
+    if (wc) { relayout(); if (lb.classList.contains('open')) openLb(cur); }
+    else if (hc && lb.classList.contains('open') && !mobileLb.matches && visible[cur]) fitLb(visible[cur]);
+  }, 120); });
+  // 창 크기는 그대로인 채 격자 폭만 바뀌는 경우가 있으므로, 격자 폭이 잰 값과 달라지면 다시 배치한다
+  // 상세창이 열려 있는 동안은 건너뛴다
+  new ResizeObserver(() => { if (grid.clientWidth !== grid._w && !lb.classList.contains('open')) relayout(); }).observe(grid);
+  grid.addEventListener('click', e => { const fb = e.target.closest('.likebtn'); if (fb) { toggleLike(fb.dataset.like); return; } const eb = e.target.closest('.editbtn'); if (eb) { openSe(eb.dataset.edit); return; } const el = e.target.closest('.card'); if (el) openLb(+el.dataset.i); });
+  grid.addEventListener('keydown', e => { if (e.target.closest('.likebtn, .editbtn, .lost')) return; const el = e.target.closest('.card'); if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openLb(+el.dataset.i); } });
+
+  // ---------- account ----------
+  const person = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+  function setUser(u) {
+    const b = $('#acctBtn');
+    if (u) {
+      b.className = 'avatar'; b.title = u.name; b.setAttribute('aria-label', u.name + ' 계정 메뉴');
+      b.innerHTML = u.picture ? `<img src="${esc(u.picture)}" alt="" referrerpolicy="no-referrer">` : person;
+      $('#acctName').textContent = u.name; $('#acctEmail').textContent = u.email;
+    } else {
+      b.className = 'iconbtn'; b.title = '로그인'; b.setAttribute('aria-label', '로그인'); b.innerHTML = person;
+      $('#acctMenu').hidden = true;
+    }
+    renderSyncStatus();
+  }
+  function renderSyncStatus() {
+    const s = $('#syncStatus');
+    if (!auth) { s.textContent = ''; return; }
+    const stale = !tokenValid();
+    $('#reauthBtn').hidden = !stale;
+    const failed = !stale && !!syncState.error;
+    $('#acctBtn').classList.toggle('stale', stale);
+    $('#acctBtn').classList.toggle('failed', failed);
+    $('#acctBtn').title = stale ? auth.user.name + ' · 로그인이 만료되었습니다' : failed ? auth.user.name + ' · 드라이브에 저장하지 못했습니다' : auth.user.name;
+    s.textContent = stale ? '로그인이 만료되어 동기화가 멈췄습니다' : syncState.busy ? '구글 드라이브와 동기화 중'
+      : syncState.error ? (syncState.error.notConfigured ? '드라이브 API가 꺼져 있어 저장하지 못했습니다' : '구글 드라이브에 저장하지 못했습니다')
+      : syncState.at ? '구글 드라이브와 동기화됨' : '';
+  }
+  function refreshSavedUI() {
+    $$('.likebtn').forEach(b => b.classList.toggle('on', likes.has(b.dataset.like)));
+    $$('.sec-h .fav').forEach(b => b.classList.toggle('on', favs.has(b.dataset.fav)));
+    const lf = $('#lbLike');
+    if (lf && visible[cur]) { const on = likes.has(visible[cur].id); lf.classList.toggle('on', on); $('#capLike').classList.toggle('on', on); }
+    if (state.like || state.favMode || (state.group && favTop)) update(); else renderPanel();
+  }
+  // 구글 토큰은 1시간짜리라 팝업으로 받아야 하며, 팝업은 클릭 같은 사용자 동작 안에서만 열린다.
+  // 이미 허용한 계정이면 prompt '' 와 hint 로 팝업이 바로 닫히므로 다시 로그인이 거의 눈에 띄지 않는다.
+  let tokenClient = null, tokenWaiter = null;
+  const gis = () => window.google?.accounts?.oauth2 || null;
+  function requestToken(cfg) {
+    return new Promise((resolve, reject) => {
+      const g = gis();
+      if (!g) return reject(Object.assign(new Error('구글 로그인을 아직 불러오지 못했습니다. 잠시 후 다시 눌러 주세요'), { code: 'not_loaded' }));
+      if (!tokenClient) tokenClient = g.initTokenClient({
+        client_id: CLIENT_ID, scope: SCOPE,
+        callback: r => { const w = tokenWaiter; tokenWaiter = null; w?.(r); },
+        error_callback: e => { const w = tokenWaiter; tokenWaiter = null; w?.({ error: e.type || 'error', error_description: e.message }); },
+      });
+      tokenWaiter = r => r.error ? reject(Object.assign(new Error(r.error_description || r.error), { code: r.error })) : resolve(r);
+      tokenClient.requestAccessToken(cfg);
+    });
+  }
+  async function signIn(cfg) {
+    const r = await requestToken(cfg);
+    if (!gis().hasGrantedAllScopes(r, DRIVE_SCOPE)) throw Object.assign(new Error('좋아요와 즐겨찾기를 저장하려면 드라이브 앱 데이터 권한을 허용해야 합니다'), { code: 'scope' });
+    const ur = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + r.access_token } });
+    if (!ur.ok) throw new Error('계정 정보를 가져오지 못했습니다');
+    const u = await ur.json();
+    const prev = auth, same = prev?.user?.sub === u.sub;
+    // 이 브라우저에 다른 계정의 사본이 남아 있으면 새 계정에 섞이지 않도록 버린다
+    if (prev && !same) { applyStore(emptyStore()); refreshSavedUI(); }
+    auth = { token: r.access_token, exp: Date.now() + (Number(r.expires_in) - 60) * 1000, user: { sub: u.sub, name: u.name || u.email, email: u.email, picture: u.picture || '' }, fileId: same ? prev.fileId : null };
+    saveAuth(); setUser(auth.user);
+  }
+  const reauthCfg = () => ({ prompt: '', hint: auth.user.email });
+  const loginErr = e => e.code === 'popup_closed' ? null
+    : e.code === 'access_denied' ? '권한 요청을 취소했습니다. 좋아요와 즐겨찾기를 저장하려면 허용이 필요합니다'
+    : e.code === 'popup_failed_to_open' ? '팝업이 차단되었습니다. 이 사이트의 팝업을 허용해 주세요'
+    : e.message || '로그인하지 못했습니다';
+  function openLogin(kind, id) { pending = kind ? { kind, id } : null; $('#loginNote').hidden = true; $('#loginBtn').disabled = false; $('#login').classList.add('open'); }
+  function closeLogin() { $('#login').classList.remove('open'); pending = null; }
+  $('#loginBtn').onclick = async () => {
+    const btn = $('#loginBtn'), note = $('#loginNote');
+    btn.disabled = true; note.hidden = true;
+    try {
+      // 처음 로그인할 때는 브라우저에 계정이 여러 개여도 고를 수 있게 계정 선택 화면을 띄운다
+      await signIn(auth ? reauthCfg() : { prompt: 'select_account' });
+      const p = pending; closeLogin();
+      await sync();
+      toast(`${auth.user.name} 계정으로 로그인했습니다`);
+      if (p) doToggle(p.kind, p.id);
+    } catch (e) { const m = loginErr(e); if (m) { $('#loginNoteText').textContent = m; note.hidden = false; } }
+    btn.disabled = false;
+  };
+  $('#reauthBtn').onclick = () => { $('#acctMenu').hidden = true; signIn(reauthCfg()).then(sync).catch(e => { const m = loginErr(e); if (m) toast(m); }); };
+  // 로그인이 만료된 뒤 첫 클릭에서 조용히 다시 로그인한다. 이미 허용한 계정이라 팝업이 바로 닫혀 거의 눈에 띄지 않는다.
+  // 자체 재로그인 흐름이 있는 자리는 건너뛰고, 실패하면 팝업이 거듭 뜨지 않도록 5분 뒤에 다시 시도한다
+  let reauthAt = 0;
+  document.addEventListener('click', e => {
+    if (!auth || tokenValid() || Date.now() - reauthAt < 300000) return;
+    if (e.target.closest('.likebtn, [data-fav], #capLike, #lbLike, #acct, #emptyLogin, #emptyReauth') || $('#login').classList.contains('open')) return;
+    reauthAt = Date.now();
+    signIn(reauthCfg()).then(() => sync()).then(() => update()).catch(() => {});
+  }, true);
+  $('#acctBtn').onclick = () => { if (auth) $('#acctMenu').hidden = !$('#acctMenu').hidden; else openLogin(); };
+  document.addEventListener('click', e => { if (!e.target.closest('#acct')) $('#acctMenu').hidden = true; });
+  $('#logoutBtn').onclick = () => {
+    $('#acctMenu').hidden = true;
+    auth = null; saveAuth(); applyStore(emptyStore()); setUser(null); refreshSavedUI();
+    toast('로그아웃했습니다');
+  };
+  $('#loginClose').onclick = closeLogin;
+  $('#login').addEventListener('click', e => { if (e.target === $('#login')) closeLogin(); });
+
+  // ---------- like · fav ----------
+  // 로그인이 살아 있으면 바로 토글하고, 없거나 만료됐으면 로그인을 마친 뒤 이어서 토글한다
+  function toggleSaved(kind, id) {
+    if (!auth) { openLogin(kind, id); return; }
+    if (!tokenValid()) { signIn(reauthCfg()).then(() => doToggle(kind, id)).catch(e => { const m = loginErr(e); if (m) toast(m); }); return; }
+    doToggle(kind, id);
+  }
+  const toggleLike = id => toggleSaved('likes', id), toggleFav = id => toggleSaved('favs', id);
+  function doToggle(kind, id) { if (kind === 'likes') doToggleLike(id); else doToggleFav(id); }
+  function doToggleFav(id) {
+    const on = !favs.has(id); setSaved('favs', id, on); toast(on ? '즐겨찾기에 추가했습니다' : '즐겨찾기를 해제했습니다');
+    if (state.favMode || (state.group && favTop)) { update(); return; }
+    $$(`.fav[data-fav="${CSS.escape(id)}"]`).forEach(b => b.classList.toggle('on', on)); renderPanel();
+  }
+  function doToggleLike(id) {
+    const on = !likes.has(id); setSaved('likes', id, on); toast(on ? '좋아요에 추가했습니다' : '좋아요를 해제했습니다');
+    if (state.like && !on) { if (lb.classList.contains('open')) closeLb(); update(); return; }
+    $$(`.likebtn[data-like="${CSS.escape(id)}"]`).forEach(b => b.classList.toggle('on', on));
+    const lf = $('#lbLike');
+    if (lf && visible[cur]?.id === id) { lf.classList.toggle('on', on); $('#capLike').classList.toggle('on', on); }
+  }
+
+  // ---------- lightbox ----------
+  const lb = $('#lb'); let cur = -1, curId = null;
+  // 세로 공간에 맞춰 이미지가 잘리지 않도록 상세창 너비를 계산한다. 양옆 화살표 자리를 남긴다
+  function fitLb(c) {
+    const stageH = innerHeight - 48, metaW = 360;
+    const stageW = Math.max(320, Math.min(Math.round(stageH * c.width / c.height), innerWidth - 152 - metaW));
+    lb.style.setProperty('--sheet-w', (stageW + metaW) + 'px');
+  }
+  function openLb(i, fromHist) {
+    cur = i; const c = visible[i], n = c._n, a = A[c.artistId], p = P[n.publisherId];
+    fitLb(c);
+    const setImg = (im, cc) => { if (!cc) { im.removeAttribute('src'); im.style.display = 'none'; return; } im.referrerPolicy = 'no-referrer'; if (cc.imageUrl) im.dataset.fb = encodeURI(cc.file); else delete im.dataset.fb; im.src = fullSrc(cc); im.style.display = ''; };
+    setImg($('#lbImg'), c); $('#lbImg').alt = n.title;
+    $('#lbLost').innerHTML = LOST_ICON; $('#lbLost').hidden = !lost.has(c.id);
+    setImg($('#lbBg'), c);
+    const fillSide = (el, cc) => el.querySelectorAll('img').forEach(im => setImg(im, cc));
+    fillSide($('#slPrev'), visible[i - 1]); fillSide($('#slNext'), visible[i + 1]);
+    $('#capTitle').textContent = coverTitle(c); $('#capLike').classList.toggle('on', likes.has(c.id));
+    lb.classList.remove('info'); $('.lb .meta').scrollTop = 0;
+    $('#lbTitle').textContent = coverTitle(c);
+    const fbtn = (k, v, label) => `<button class="flink" data-fk="${k}" data-fv="${esc(v)}" title="이 항목으로 필터">${esc(label)}</button>`;
+    // 왼쪽 필터 패널까지 가지 않고 상세창에서 바로 담도록 값마다 별표를 붙인다
+    const fstar = (k, v) => `<button type="button" class="fav${favs.has(favId(k, v)) ? ' on' : ''}" data-fav="${esc(favId(k, v))}" title="즐겨찾기" aria-label="${LABEL[k]} 즐겨찾기">${star}</button>`;
+    const fpair = (k, v, label) => fbtn(k, v, label) + fstar(k, v);
+    const genres = n.genres.map(g => fbtn('genres', g, g)).join(' · ');
+    const kvGenres = n.genres.map(g => fpair('genres', g, g)).join(' · ');
+    // 모바일 요약 줄과 상세 제목 아래 줄은 같은 내용을 보여 주고 스타일만 다르다
+    const sub = `${fbtn('artistId', c.artistId, a?.nickname || '')} 그림 · ${fbtn('novelAuthor', n.novelAuthor, n.novelAuthor)} 저${genres ? ` · ${genres}` : ''}`;
+    $('#capSub').innerHTML = sub; $('#lbSub').innerHTML = sub;
+    const social = a?.socialUrl ? ` <a class="handle" href="${esc(a.socialUrl)}" target="_blank" rel="noopener">${a.handle ? '@' + esc(a.handle) : '링크'}</a>` : '';
+    // 인물구성·시간대·공간·장소는 분류된 값만 줄로 보여 준다
+    const scene = COVER_KEYS.map(k => { const vs = valuesOf(c, k); return vs.length ? `<dt>${LABEL[k]}</dt><dd>${vs.map(v => fpair(k, v, nameOf(k, v))).join(' · ')}</dd>` : ''; }).join('');
+    $('#lbKv').innerHTML = `<dt>그림작가</dt><dd>${fbtn('artistId', c.artistId, a?.nickname || '')}${fstar('artistId', c.artistId)}${social}</dd><dt>장르</dt><dd>${kvGenres || '<span style="color:var(--faint)">—</span>'}</dd><dt>글작가</dt><dd>${fpair('novelAuthor', n.novelAuthor, n.novelAuthor)}</dd><dt>출판사</dt><dd>${fpair('publisherId', n.publisherId, p?.name || '')}</dd><dt>플랫폼</dt><dd>${n.platforms.length ? n.platforms.map(pf => `${fbtn('platforms', pf.name, pf.name)}${fstar('platforms', pf.name)}<a class="ext" href="${esc(pf.url)}" target="_blank" rel="noopener" title="${esc(pf.name)}에서 보기" aria-label="${esc(pf.name)}에서 보기">${EXT_ICON}</a>`).join(' · ') : '<span style="color:var(--faint)">—</span>'}</dd>${n.publishedAt ? `<dt>출간일</dt><dd>${esc(n.publishedAt.replaceAll('-', '.'))}${fstar('year', n.publishedAt.slice(0, 4))}</dd>` : ''}${scene}<dt>크기</dt><dd id="lbSize">${c.width} × ${c.height}</dd><dt>출처</dt><dd style="word-break:break-all">${c.sourceUrl ? `<a class="path" href="${esc(c.sourceUrl)}" target="_blank" rel="noopener" title="이미지 출처 페이지 열기">${esc(c.sourceUrl.replace(/^https?:\/\//, ''))}<span class="ext">${EXT_ICON}</span></a>` : '<span style="color:var(--faint)">—</span>'}</dd>`;
+    $('#lbTags').innerHTML = n.tags.map(t => `<span class="tag"><button class="flink" data-fk="tags" data-fv="${esc(t)}" title="이 해시태그로 필터">#${esc(t)}</button>${fstar('tags', t)}</span>`).join('');
+    $('#lbLike').classList.toggle('on', likes.has(c.id));
+    $('#lbLike').onclick = () => toggleLike(c.id);
+    $('#lbEdit').hidden = $('#capEdit').hidden = !EDITABLE;
+    $('#lbPrev').classList.toggle('end', i === 0);
+    $('#lbNext').classList.toggle('end', i >= visible.length - 1);
+    if (!lb.classList.contains('open') && !fromHist) history.pushState({ lb: true }, '');
+    lb.classList.add('open'); document.body.style.overflow = 'hidden';
+    curId = state.lb = c.id; writeHash();
+    if (!mobileLb.matches) $('#lbLike').focus({ preventScroll: true });
+  }
+  function hideLb() { lb.classList.remove('open'); document.body.style.overflow = ''; curId = null; state.lb = ''; writeHash(); cardEls[cur]?.focus(); }
+  // 기기·브라우저의 뒤로가기로 닫히도록 history 상태를 되돌린다
+  function closeLb() { if (history.state && history.state.lb) history.back(); else hideLb(); }
+  // 주소의 lb 값에 화면을 맞춘다. 목록에 없는 표지면 데이터를 더 불러온 뒤를 기다린다
+  // 원격 이미지를 못 받아 로컬 파일로 대체되면 크기도 실제로 보여 주는 이미지에 맞춘다
+  $('#lbImg').addEventListener('load', e => {
+    if (!visible[cur]) return;
+    $('#lbSize').textContent = `${e.target.naturalWidth} × ${e.target.naturalHeight}`;
+  });
+  function syncLb() {
+    if (state.lb) {
+      if (curId === state.lb && lb.classList.contains('open')) return;
+      const i = visible.findIndex(c => c.id === state.lb);
+      if (i >= 0) openLb(i, true);
+    } else if (lb.classList.contains('open')) hideLb();
+  }
+  $('#lbBack').onclick = closeLb;
+
+  const goPrev = () => cur > 0 ? openLb(cur - 1) : toast('첫번째 이미지입니다.');
+  const goNext = () => cur < visible.length - 1 ? openLb(cur + 1) : toast('마지막 이미지입니다.');
+  $('#lbPrev').onclick = goPrev;
+  $('#lbNext').onclick = goNext;
+  const mobileLb = matchMedia('(max-width: 900px)');
+  // 이전·현재·다음 세 칸짜리 트랙을 좌우로 끌어 넘긴다. 터치·마우스·펜 모두 포인터 이벤트로 받는다.
+  // 화면 폭의 18%(최대 80px) 넘게 밀면 옆 칸까지 밀어 넣는 애니메이션 뒤에 인덱스를 바꾸고, 아니면 제자리로 돌아온다. 끝에서는 저항감을 준다.
+  // 모바일에서 아래로 끌면 이미지가 손가락을 따라 내려가며 배경이 옅어지다가, 120px 넘게 내리거나 빠르게 튕기면 상세창이 닫힌다.
+  let lastSwipe = 0;
+  (() => {
+    const stage = $('.lb .stage'), track = $('#lbTrack');
+    let id = null, sx = 0, sy = 0, dx = 0, dy = 0, horiz = null, animating = false, lastY = 0, lastT = 0, vy = 0;
+    const pull = y => {
+      const now = performance.now(); vy = (y - lastY) / Math.max(1, now - lastT); lastY = y; lastT = now;
+      dy = Math.max(0, y - sy);
+      // 위로 끄는 동안에는 아무것도 하지 않는다. 아래로 내려오기 시작해야 끌기 상태로 들어간다
+      if (dy === 0 && !lb.classList.contains('pulling')) return;
+      const p = Math.min(1, dy / 400);
+      lb.classList.add('pulling');
+      stage.style.transition = 'none';
+      stage.style.transform = `translateY(${dy}px)`;
+      lb.style.backgroundColor = `rgba(0,0,0,${1 - p * .8})`;
+    };
+    const resetPull = () => { lb.classList.remove('pulling'); stage.style.transition = ''; stage.style.transform = ''; lb.style.backgroundColor = ''; lb.style.transition = ''; };
+    const endPull = () => {
+      if (!lb.classList.contains('pulling')) return;
+      const close = dy > 120 || (vy > 0.6 && dy > 30);
+      stage.style.transition = 'transform .22s ease'; lb.style.transition = 'background-color .22s ease';
+      if (close) {
+        stage.style.transform = `translateY(${innerHeight}px)`; lb.style.backgroundColor = 'rgba(0,0,0,0)';
+        setTimeout(() => { closeLb(); resetPull(); }, 220);
+      } else {
+        stage.style.transform = ''; lb.style.backgroundColor = '';
+        setTimeout(resetPull, 240);
+      }
+    };
+    stage.addEventListener('pointerdown', e => {
+      if (lb.classList.contains('info') || id !== null || animating) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest('button, .cap')) return;
+      id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = 0; dy = 0; horiz = null; vy = 0; lastY = e.clientY; lastT = performance.now();
+      track.style.transition = 'none';
+    });
+    stage.addEventListener('pointermove', e => {
+      if (e.pointerId !== id) return;
+      // 창 밖에서 버튼을 떼면 pointerup 이 오지 않으므로, 버튼이 안 눌린 마우스 이동은 드래그 종료로 본다
+      if (e.pointerType === 'mouse' && !(e.buttons & 1)) { end(e); return; }
+      const mx = e.clientX - sx, my = e.clientY - sy;
+      if (horiz === null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) {
+        horiz = Math.abs(mx) > Math.abs(my);
+        // 이동이 확정된 뒤에 캡처해야 탭했을 때 클릭 대상이 버튼에서 바뀌지 않는다
+        try { stage.setPointerCapture(id); } catch (_) {}
+      }
+      if (horiz === null) return;
+      if (!horiz) { if (mobileLb.matches) pull(e.clientY); return; }
+      dx = mx;
+      const edge = (dx > 0 && cur === 0) || (dx < 0 && cur >= visible.length - 1);
+      track.style.transform = `translateX(${edge ? dx / 3 : dx}px)`;
+    });
+    const end = e => {
+      if (e.pointerId !== id) return;
+      id = null;
+      // 어느 방향이든 움직였다면 탭이 아니므로 뒤따르는 클릭을 무시한다
+      if (horiz !== null) lastSwipe = Date.now();
+      if (horiz === false) { endPull(); return; }
+      const go = Math.abs(dx) > Math.min(80, innerWidth * 0.18);
+      const goNext = go && dx < 0 && cur < visible.length - 1, goPrev = go && dx > 0 && cur > 0;
+      track.style.transition = 'transform .26s cubic-bezier(.2,.8,.2,1)';
+      if (!goNext && !goPrev) {
+        track.style.transform = '';
+        if (go) toast(dx > 0 ? '첫번째 이미지입니다.' : '마지막 이미지입니다.');
+        return;
+      }
+      animating = true;
+      const w = stage.clientWidth, next = goNext ? cur + 1 : cur - 1;
+      const done = () => {
+        if (!animating) return;
+        animating = false; track.removeEventListener('transitionend', done);
+        track.style.transition = 'none'; track.style.transform = '';
+        openLb(next);
+      };
+      track.addEventListener('transitionend', done);
+      setTimeout(done, 320);
+      track.style.transform = `translateX(${goNext ? -w : w}px)`;
+    };
+    stage.addEventListener('pointerup', end);
+    stage.addEventListener('pointercancel', end);
+    // 터치는 닿은 자식 요소에 자동 캡처가 걸리므로, 캡처를 stage 로 옮길 때 자식에서 lostpointercapture 가 버블링된다. stage 자신의 것만 종료로 본다
+    stage.addEventListener('lostpointercapture', e => { if (e.target === stage) end(e); });
+    window.addEventListener('pointerup', end, true);
+    window.addEventListener('pointercancel', end, true);
+    window.addEventListener('blur', () => { if (id !== null) end({ pointerId: id }); });
+    lb.addEventListener('dragstart', e => e.preventDefault());
+  })();
+  // 정보 시트는 손잡이·제목 영역을 끌면 언제나, 본문은 맨 위까지 올라간 상태에서 아래로 끌면 따라 내려온다.
+  // 높이의 30% 넘게 내리거나 빠르게 튕기면 닫히고, 아니면 제자리로 돌아온다.
+  (() => {
+    const meta = $('.lb .meta'), dim = $('#lbDim');
+    let sy = 0, dy = 0, lastY = 0, lastT = 0, vy = 0, active = false, pid = null, pDecided = false, tActive = false, tDecided = false, tsx = 0;
+    const begin = y => { sy = lastY = y; dy = 0; vy = 0; lastT = performance.now(); active = true; meta.classList.add('dragging'); };
+    const move = y => {
+      const now = performance.now(); vy = (y - lastY) / Math.max(1, now - lastT); lastY = y; lastT = now;
+      dy = Math.max(0, y - sy);
+      meta.style.transform = `translateY(${dy}px)`;
+      dim.style.opacity = String(Math.max(0, 1 - dy / meta.offsetHeight));
+    };
+    const finish = () => {
+      if (!active) return;
+      active = false; meta.classList.remove('dragging');
+      meta.style.transform = ''; dim.style.opacity = '';
+      if (dy > 6) lastSwipe = Date.now();
+      if (dy > meta.offsetHeight * 0.3 || (vy > 0.5 && dy > 20)) lb.classList.remove('info');
+    };
+    // 손잡이·제목 영역: 터치·마우스 모두
+    meta.addEventListener('pointerdown', e => {
+      if (!mobileLb.matches || !lb.classList.contains('info') || pid !== null || !e.target.closest('.head, .grip')) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      pid = e.pointerId; pDecided = false; begin(e.clientY);
+    });
+    meta.addEventListener('pointermove', e => {
+      if (e.pointerId !== pid) return;
+      if (e.pointerType === 'mouse' && !(e.buttons & 1)) { pend(e); return; }
+      if (!pDecided) { if (Math.abs(e.clientY - sy) < 6) return; pDecided = true; try { meta.setPointerCapture(pid); } catch (_) {} }
+      move(e.clientY);
+    });
+    const pend = e => { if (e.pointerId !== pid) return; pid = null; finish(); };
+    meta.addEventListener('pointerup', pend); meta.addEventListener('pointercancel', pend);
+    meta.addEventListener('lostpointercapture', e => { if (e.target === meta) pend(e); });
+    window.addEventListener('pointerup', pend, true); window.addEventListener('pointercancel', pend, true);
+    window.addEventListener('blur', () => { if (pid !== null) pend({ pointerId: pid }); });
+    // 본문: 맨 위에서 아래로 끄는 터치만 가로챈다
+    meta.addEventListener('touchstart', e => {
+      if (!mobileLb.matches || !lb.classList.contains('info') || e.touches.length !== 1 || e.target.closest('.head, .grip')) return;
+      tActive = true; tDecided = false; tsx = e.touches[0].clientX; begin(e.touches[0].clientY); active = false;
+    }, { passive: true });
+    meta.addEventListener('touchmove', e => {
+      if (!tActive) return;
+      const y = e.touches[0].clientY, x = e.touches[0].clientX;
+      if (!tDecided) {
+        tDecided = true;
+        if (!(y - sy > 0 && Math.abs(y - sy) >= Math.abs(x - tsx) && meta.scrollTop <= 0)) { tActive = false; meta.classList.remove('dragging'); return; }
+        active = true;
+      }
+      if (e.cancelable) e.preventDefault();
+      move(y);
+    }, { passive: false });
+    const tend = () => { if (!tActive) return; tActive = false; if (active) finish(); else meta.classList.remove('dragging'); };
+    meta.addEventListener('touchend', tend); meta.addEventListener('touchcancel', tend);
+  })();
+  lb.addEventListener('click', e => {
+    if (Date.now() - lastSwipe < 400) return;
+    const fs = e.target.closest('[data-fav]');
+    if (fs) { toggleFav(fs.dataset.fav); return; }
+    const f = e.target.closest('.flink');
+    if (f) { const k = f.dataset.fk, v = f.dataset.fv; history.pushState(null, ''); KEYS.forEach(x => state.sel[x].clear()); state.q = ''; qEl.value = ''; state.sel[k].add(v); hideLb(); update(); toast(`${LABEL[k]} · ${nameOf(k, v)} 필터 적용`); return; }
+    if (e.target.closest('#capLike')) { visible[cur] && toggleLike(visible[cur].id); return; }
+    if (e.target.closest('#capEdit')) { visible[cur] && openSe(visible[cur].id); return; }
+    if (e.target.closest('#capGray')) { setGray(!gray); return; }
+    if (e.target.closest('#lbCap')) { lb.classList.add('info'); return; }
+    if (e.target.closest('#lbGrip') || e.target === $('#lbDim') || (lb.classList.contains('info') && e.target.closest('.stage'))) { lb.classList.remove('info'); return; }
+    if (!mobileLb.matches && (e.target === lb || e.target.classList.contains('stage'))) closeLb();
+  });
+  document.addEventListener('keydown', e => {
+    if ($('#login').classList.contains('open')) { if (e.key === 'Escape') closeLogin(); return; }
+    if (se.classList.contains('open')) { if (e.key === 'Escape') closeSe(); return; }
+    if (!lb.classList.contains('open')) { if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); } return; }
+    if (e.key === 'Escape') { if (lb.classList.contains('info')) lb.classList.remove('info'); else closeLb(); } else if (e.key === 'ArrowLeft') $('#lbPrev').click(); else if (e.key === 'ArrowRight') $('#lbNext').click(); else if (e.key === 'f' || e.key === 'F') visible[cur] && toggleLike(visible[cur].id); else if (e.key === 'g' || e.key === 'G') setGray(!gray);
+  });
+  // ---------- 장면 분류 편집 ----------
+  // localhost 로 띄운 serve.py 에서만 쓸 수 있다. 저장하면 서버가 data/scenes.json·covers.json·data.js 를 함께 고친다
+  const se = $('#se');
+  let draft = null, editId = null;
+  const castText = d => CAST_PARTS.flatMap(k => Array(d.n[k]).fill(k)).join('+');
+  // 동물·장소처럼 여러 값을 고르는 항목. 칩을 눌러 켜고 끄며, 목록에 없는 값은 입력칸으로 더한다
+  const SE_LISTS = ['animal', 'place'];
+  function openSe(id) {
+    const c = covers.find(x => x.id === id); if (!c) return;
+    editId = c.id;
+    const parts = c.cast ? c.cast.split('+') : [];
+    draft = { n: Object.fromEntries(CAST_PARTS.map(k => [k, parts.filter(p => p === k).length])), animal: [...c.animal], time: c.time || '', space: c.space || '', place: [...c.place] };
+    $('#seWho').textContent = `${A[c.artistId]?.nickname || ''} · ${coverTitle(c)}`;
+    $$('[data-add]', se).forEach(i => i.value = '');
+    renderSe(); se.classList.add('open');
+  }
+  function closeSe() { se.classList.remove('open'); draft = editId = null; }
+  function renderSe() {
+    const chip = (attr, v, on, label = v) => `<button type="button" class="chip${on ? ' on' : ''}" ${attr}="${esc(v)}">${esc(label)}</button>`;
+    $('#seCast').innerHTML = CAST_PARTS.map(k => `<span class="step"><button type="button" data-dec="${k}" aria-label="${k} 빼기">−</button><span>${k}<b class="${draft.n[k] ? '' : 'zero'}">${draft.n[k]}</b></span><button type="button" data-inc="${k}" aria-label="${k} 더하기">+</button></span>`).join('');
+    $('#seCastText').textContent = castText(draft) ? castLabel(castText(draft)) : '없음';
+    $('#seTime').innerHTML = ['', ...TIMES].map(v => chip('data-time', v, draft.time === v, v || '없음')).join('');
+    $('#seSpace').innerHTML = ['', '실내', '실외'].map(v => chip('data-space', v, draft.space === v, v || '없음')).join('');
+    // 고른 값을 앞에 두고, 나머지는 다른 표지에 쓰인 값을 많이 쓰인 순으로 늘어놓는다
+    for (const k of SE_LISTS) {
+      const used = new Map(); covers.forEach(c => c[k].forEach(p => used.set(p, (used.get(p) || 0) + 1)));
+      const rest = [...used.keys()].filter(p => !draft[k].includes(p)).sort((a, b) => used.get(b) - used.get(a) || a.localeCompare(b, 'ko'));
+      $(`[data-list="${k}"]`, se).innerHTML = [...draft[k].map(p => chip(`data-${k}`, p, true)), ...rest.map(p => chip(`data-${k}`, p, false))].join('');
+    }
+  }
+  function addItem(k) { const i = $(`[data-add="${k}"]`, se), v = i.value.trim(); if (v && !draft[k].includes(v)) draft[k].push(v); i.value = ''; renderSe(); }
+  se.addEventListener('click', e => {
+    if (e.target === se) { closeSe(); return; }
+    const b = e.target.closest('button'); if (!b || !draft) return;
+    const d = b.dataset, lk = SE_LISTS.find(k => d[k]);
+    if (d.inc) draft.n[d.inc]++;
+    else if (d.dec) draft.n[d.dec] = Math.max(0, draft.n[d.dec] - 1);
+    else if ('time' in d) draft.time = d.time;
+    else if ('space' in d) draft.space = d.space;
+    else if (lk) draft[lk] = draft[lk].includes(d[lk]) ? draft[lk].filter(p => p !== d[lk]) : [...draft[lk], d[lk]];
+    else if (d.addbtn) { addItem(d.addbtn); return; }
+    else return;
+    renderSe();
+  });
+  se.addEventListener('keydown', e => { const k = e.target.dataset?.add; if (k && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addItem(k); } });
+  $('#seCancel').onclick = closeSe;
+  $('#lbEdit').onclick = () => visible[cur] && openSe(visible[cur].id);
+  $('#seSave').onclick = async () => {
+    const id = editId, scene = { cast: castText(draft), animal: draft.animal, time: draft.time, space: draft.space, place: draft.place };
+    $('#seSave').disabled = true;
+    try {
+      const r = await fetch('api/scene', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...scene }) });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.error || r.status);
+      const c = covers.find(x => x.id === id);
+      Object.assign(c, body); c._search = searchText(c);
+      closeSe(); update();
+      // 상세창에서 고쳤다면 그 표지를 다시 띄우고, 바뀐 값 때문에 현재 필터에서 빠지면 상세창을 닫는다
+      const i = visible.findIndex(x => x.id === id);
+      if (!lb.classList.contains('open')) toast(i < 0 ? '저장했습니다. 현재 필터에서는 빠졌습니다' : '저장했습니다', i < 0 ? 2200 : 1500);
+      else if (i < 0) { closeLb(); toast('저장했습니다. 현재 필터에서는 빠졌습니다', 2200); } else { openLb(i, true); toast('저장했습니다'); }
+    } catch (err) { toast(`저장하지 못했습니다: ${err.message}`, 3000); }
+    finally { $('#seSave').disabled = false; }
+  };
+  function toast(msg, ms = 1500) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), ms); }
+
+  // ---------- header controls ----------
+  const qEl = $('#q'); let qt;
+  qEl.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { state.q = qEl.value.trim().toLowerCase(); update(); }, 120); });
+  $('#qClear').onclick = () => { qEl.value = ''; state.q = ''; update(); qEl.focus(); };
+  $('#likeToggle').onclick = () => { if (!auth && !state.like) { openLogin(); return; } state.like = !state.like; if (state.like) state.favMode = false; update(); };
+  // 즐겨찾기 모드. 그룹 기준은 아래 토글 줄에서 고른 favKey 를 쓰고, 그동안 그룹 드롭다운은 비활성으로 둔다
+  $('#favToggle').onclick = () => {
+    if (!state.favMode && !auth) { openLogin(); return; }
+    state.favMode = !state.favMode;
+    if (state.favMode) state.like = false;
+    // 켤 때 지금 기준에 즐겨찾기가 없으면 즐겨찾기가 있는 첫 기준을 고른다
+    const has = k => [...favs].some(id => id.startsWith(k + ':'));
+    if (state.favMode && !has(state.favKey)) state.favKey = KEYS.find(has) || state.favKey;
+    update();
+  };
+  $('#favBar').addEventListener('click', e => { const b = e.target.closest('[data-favkey]'); if (b) { state.favKey = b.dataset.favkey; update(); } });
+  $('#sort').onchange = e => { state.sort = e.target.value; if (state.sort === 'random') covers.forEach(c => c._rand = Math.random()); update(); };
+  $('#group').onchange = e => { state.group = e.target.value; update(); };
+  colW = +localStorage.getItem('colW') || (innerWidth < 600 ? 160 : 240);
+  // 화면 폭이 달라져도 비슷한 크기가 유지되도록 열 개수가 아니라 열 너비를 저장한다
+  size.addEventListener('input', () => { const n = +size.value; colW = Math.floor((grid.clientWidth - gap * (n - 1)) / n); localStorage.setItem('colW', colW); relayout(); });
+  const panel = $('#panel');
+  const setPanel = open => { panel.classList.toggle('hidden', !open); document.body.classList.toggle('panel-open', open); $('#togglePanel').classList.toggle('on', open); localStorage.setItem('panel', open ? '1' : '0'); setTimeout(relayout, 220); };
+  $('#togglePanel').onclick = () => setPanel(panel.classList.contains('hidden'));
+  $('#scrim').onclick = () => setPanel(false);
+  // 사이드바 너비 드래그 조절
+  const PANEL_MIN = 180, PANEL_MAX = 520;
+  const setPanelW = w => { w = Math.max(PANEL_MIN, Math.min(PANEL_MAX, Math.round(w))); document.documentElement.style.setProperty('--panel-w', w + 'px'); return w; };
+  setPanelW(+localStorage.getItem('panelW') || 264);
+  $('#resizer').addEventListener('pointerdown', e => {
+    e.preventDefault(); const startX = e.clientX, startW = panel.getBoundingClientRect().width;
+    document.body.classList.add('resizing'); let w = startW;
+    const move = ev => { w = setPanelW(startW + ev.clientX - startX); };
+    const up = () => { document.body.classList.remove('resizing'); localStorage.setItem('panelW', w); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); relayout(); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  });
+  $('#resizer').addEventListener('dblclick', () => { setPanelW(264); localStorage.setItem('panelW', 264); relayout(); });
+
+  // ---------- update ----------
+  function update() {
+    const matched = covers.filter(c => matches(c));
+    visible = sorted(matched);
+    const total = state.like || state.favMode ? covers.filter(inMode).length : covers.length;
+    $('#count').innerHTML = matched.length !== total ? `<b>${matched.length}</b> / ${total}` : `${matched.length} / ${total}`;
+    $('#favTop').hidden = !state.group || state.favMode; $('#favTopCb').checked = favTop;
+    $('#favToggle').classList.toggle('on', state.favMode);
+    $('#favBar').hidden = !state.favMode;
+    $('#likeBar').hidden = !state.like;
+    if (state.favMode) $('#favKeys').innerHTML = KEYS.map(k => { const n = [...favs].filter(id => id.startsWith(k + ':')).length; return `<button type="button" class="${k === state.favKey ? 'on' : ''}${n ? '' : ' dim'}" data-favkey="${k}">${LABEL[k]}<span class="n">${n}</span></button>`; }).join('');
+    $('#group').disabled = state.favMode;
+    $('#searchWrap').classList.toggle('has', !!state.q);
+    $('#likeToggle').classList.toggle('on', state.like);
+    renderChips(); renderPanel(); writeHash(); resetGrid();
+  }
+  readHash();
+  qEl.value = state.q; $('#sort').value = state.sort; $('#group').value = state.group;
+  // 저장된 닫힘 상태를 복원할 때는 여닫기 애니메이션을 건너뛴다. 접히는 도중에 그리드 너비를 재면 오른쪽에 빈 여백이 남기 때문이다
+  const panelPref = localStorage.getItem('panel');
+  document.body.classList.add('noanim');
+  panel.classList.toggle('hidden', panelPref === '0' || (panelPref === null && innerWidth < 900));
+  document.body.classList.toggle('panel-open', !panel.classList.contains('hidden'));
+  $('#togglePanel').classList.toggle('on', !panel.classList.contains('hidden'));
+  window.addEventListener('hashchange', () => { const prev = filterHash().toString(); readHash(); qEl.value = state.q; $('#sort').value = state.sort; $('#group').value = state.group; if (filterHash().toString() !== prev) update(); syncLb(); });
+  setUser(auth?.user || null);
+  // 토큰이 살아 있으면 드라이브와 맞추고, 만료됐으면 캐시로 보여 주다가 다음 클릭에서 다시 로그인한다. 첫 렌더가 동기화 중임을 알 수 있게 먼저 시작한다
+  if (auth) sync();
+  update();
+  syncLb();
+  requestAnimationFrame(() => document.body.classList.remove('noanim'));
+})();
+</script>
+</body>
+</html>
